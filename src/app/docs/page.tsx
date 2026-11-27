@@ -105,7 +105,7 @@ export default function DocsPage() {
               <a href="#api"><b>HTTP API <ArrowRight className="ico ico-sm" style={{ display: "inline", verticalAlign: -2 }} /></b><span>Desk state, live stream, quotes and supply endpoints.</span></a>
               <a href="#security"><b>Security <ArrowRight className="ico ico-sm" style={{ display: "inline", verticalAlign: -2 }} /></b><span>What can and can&apos;t happen to the treasury.</span></a>
             </div>
-            <Note><b>Current status.</b> Phase 2 is live: HyperCore market data (HYPE-PERP book, trades, candles, funding), the Mood Engine and the wick detector run on real Hyperliquid data in the app. Phase 3 is built: the MakoDesk contract is complete and tested, and it deploys on Elysium as soon as Kinetiq publishes the market-data precompile and ElysiumCoreWriter interfaces. Desk fills, PnL and burns appear in the app from that moment.</Note>
+            <Note><b>Current status.</b> Phase 2 is live: HyperCore market data (HYPE-PERP book, trades, candles, funding), the Mood Engine and the wick detector run on real Hyperliquid data in the app. Phase 3: MakoDesk is deployed on Elysium mainnet and source-verified, and it is held in a halted state. It starts quoting only after the Elysium precompile and ElysiumCoreWriter are wired and the external audit is done, each step through the 48-hour timelock. Desk fills, PnL and burns appear in the app from that moment.</Note>
           </section>
 
           <section id="identity">
@@ -223,7 +223,7 @@ export default function DocsPage() {
           <section id="burns">
             <h2>Buyback &amp; burn</h2>
             <ul>
-              <li>At each epoch, <strong>{cfg.tokenomics.burnShare}%</strong> of realized desk profit buys $MAKO from the official pool and sends it to <code>0x000…dEaD</code>. The rest is kept as desk capital.</li>
+              <li>At each epoch, <strong>{cfg.tokenomics.burnShare}%</strong> of realized desk profit buys $MAKO from the official Montra pool and sends it to <code>0x000…dEaD</code>. The rest is kept as desk capital.</li>
               <li>Burns are never funded from principal. A losing epoch burns nothing.</li>
               <li>Each burn emits <code>Burned(amount, reason, epoch)</code> and appears in the app&apos;s Burn log with its transaction.</li>
             </ul>
@@ -277,14 +277,17 @@ export default function DocsPage() {
             <p>Addresses are published here, on makodesk.xyz and on @makodeskapp at deployment. Treat any address from another source as a scam.</p>
             <div className="tw"><table className="dtable"><tbody>
               <tr><th>Contract</th><th>Address</th><th>Status</th></tr>
-              <tr><td>$MAKO token</td><td className="mono">{addr(cfg.contracts.token)}</td><td>At launch</td></tr>
-              <tr><td>MakoDesk</td><td className="mono">{addr(cfg.contracts.desk)}</td><td>Built and tested · deploys when the CoreWriter interface is published</td></tr>
+              <tr><td>$MAKO token</td><td className="mono">{addr(cfg.contracts.token)}</td><td>Live · launched on Montra</td></tr>
+              <tr><td>MakoDesk</td><td className="mono">{addr(cfg.contracts.desk)}</td><td>Deployed · halted until the Elysium precompile and CoreWriter are wired and the audit is done</td></tr>
+              <tr><td>TimelockController (48h)</td><td className="mono">{addr("0x8E02C8EdCd5b967b9C26D8C15F3662D2B4f5C17c")}</td><td>Deployed · owns MakoDesk</td></tr>
               <tr><td>LP lock</td><td className="mono">{addr(cfg.contracts.lp)}</td><td>At launch</td></tr>
               <tr><td>Burn address</td><td className="mono">0x000000000000000000000000000000000000dEaD</td><td>—</td></tr>
             </tbody></table></div>
             <h3>MakoDesk status</h3>
             <ul>
-              <li><strong>Tests:</strong> 41 Foundry tests in total: 36 unit and fuzz tests, plus 5 invariants each checked over 8,192 random calls.</li>
+              <li><strong>Tests:</strong> 43 Foundry tests in total: 38 unit and fuzz tests, plus 5 invariants each checked over 8,192 random calls.</li>
+              <li><strong>Deployed halted:</strong> MakoDesk is live on Elysium mainnet in a paused state and without the token. The $MAKO address is added once, after the Montra launch, through the 48-hour timelock (<code>setToken</code>) and can never be changed. Quoting can only resume through the timelock once the HyperCore adapters and account are wired.</li>
+              <li><strong>Rehearsal on an Elysium mainnet fork:</strong> the deployment and full loop were run against a fork of Elysium mainnet.</li>
               <li><strong>Full-loop rehearsal:</strong> on a local chain the desk ran poke, quote, fill, settle and buyback, burned MAKO to <code>0x…dEaD</code>, and the dashboard read it live.</li>
               <li><strong>Waiting on Elysium:</strong> the precompile and ElysiumCoreWriter addresses and ABI are not published yet. Until they are, the adapter contract refuses to quote, so nothing can trade by accident.</li>
               <li><strong>Audit:</strong> the audit package is prepared. The external audit report will be linked here before the desk holds capital.</li>
@@ -296,14 +299,14 @@ export default function DocsPage() {
               <tr><td className="mono">settle()</td><td>Anyone</td><td>Closes the epoch and sets the burn budget, once per epoch.</td></tr>
               <tr><td className="mono">kill(reason)</td><td>Guardian / owner, or anyone on a provable breach</td><td>Cancels quotes and pauses the desk.</td></tr>
               <tr><td className="mono">resume()</td><td>Timelock only</td><td>Restarts quoting after a kill.</td></tr>
-              <tr><td className="mono">buybackAndBurn(...)</td><td>Keeper</td><td>Buys MAKO through the official pool within the settled budget and sends it to <code>0x…dEaD</code>.</td></tr>
+              <tr><td className="mono">buybackAndBurn(...)</td><td>Keeper</td><td>Buys MAKO through the buyback router (a Uniswap v4 adapter for the Montra pool, set through the timelock) within the settled budget and sends it to <code>0x…dEaD</code>.</td></tr>
             </tbody></table></div>
             <h3>How settlement works</h3>
             <ul>
               <li>Profit counts as the smaller of realized fill PnL (after fees) and the change in HyperCore equity, so funding costs and unrealized losses are never burned.</li>
               <li>Burn budget = profit × 80% × mood multiplier, capped at 100% of profit. A losing epoch burns nothing.</li>
               <li><strong>Wick detector:</strong> a drop of 1.5% or more within about 3 seconds, together with at least $1M liquidated, switches the desk to Breach for about 5 minutes, bid-only, and arms the wick bonus for the next settlement.</li>
-              <li><strong>Governance:</strong> the owner is a 48-hour OpenZeppelin TimelockController run by a multisig, with no admin key. A guardian multisig can stop the desk instantly but cannot move funds.</li>
+              <li><strong>Governance:</strong> the desk is owned by a 48-hour OpenZeppelin TimelockController controlled by the team wallet. Every parameter change is public for 48 hours before it can run. The guardian can stop the desk instantly but cannot move funds.</li>
             </ul>
           </section>
 
@@ -316,12 +319,12 @@ export default function DocsPage() {
 
           <section id="roadmap">
             <h2>Roadmap</h2>
-            <p>Phases 1 and 2 are complete. Phase 3 is built and deploys as soon as Elysium publishes the CoreWriter interface.</p>
+            <p>Phases 1 and 2 are complete. Phase 3 is deployed: MakoDesk is on Elysium mainnet and starts quoting once the CoreWriter interface is wired and the audit is done.</p>
             <div className="tw"><table className="dtable"><tbody>
               <tr><th>Phase</th><th>Depends on</th><th>Delivers</th></tr>
               <tr><td><strong>1 · Surface</strong> <span className="pill mint" style={{ height: 20, marginLeft: 6 }}><Check className="ico ico-sm" />Complete</span></td><td>Elysium mainnet (live)</td><td>Brand, app and docs, explorer verification. Fair launch with locked LP at token launch.</td></tr>
               <tr><td><strong>2 · Sense</strong> <span className="pill mint" style={{ height: 20, marginLeft: 6 }}><Check className="ico ico-sm" />Complete</span></td><td>Live HyperCore data</td><td>Live Mood Engine, wick detector, real-time dashboard</td></tr>
-              <tr><td><strong>3 · Strike</strong> <span className="pill mint" style={{ height: 20, marginLeft: 6 }}><Check className="ico ico-sm" />Built</span></td><td>ElysiumCoreWriter interface published</td><td>MakoDesk built and tested, buyback and burn loop rehearsed, audit package prepared. Deploys when the interface is published.</td></tr>
+              <tr><td><strong>3 · Strike</strong> <span className="pill mint" style={{ height: 20, marginLeft: 6 }}><Check className="ico ico-sm" />Deployed</span></td><td>ElysiumCoreWriter interface published</td><td>MakoDesk deployed and verified on Elysium mainnet (halted). Quoting starts once CoreWriter is wired and the external audit is done.</td></tr>
               <tr><td><strong>4 · Apex</strong></td><td>Track record</td><td>HyperCore spot listing path, higher caps, multi-market desk</td></tr>
             </tbody></table></div>
           </section>
@@ -330,7 +333,7 @@ export default function DocsPage() {
             <h2>Security</h2>
             <ul>
               <li><strong>Token:</strong> minimal OpenZeppelin ERC-20 with no owner functions, verified source.</li>
-              <li><strong>Desk:</strong> 41 tests (including 5 invariants) pass and the audit package is prepared. The external audit is completed before the desk holds capital, and the report will be linked here.</li>
+              <li><strong>Desk:</strong> 43 tests (including 5 invariants) pass and the audit package is prepared. The external audit is completed before the desk holds capital, and the report will be linked here.</li>
               <li><strong>Agent keys:</strong> trade-only. A leaked key can&apos;t move funds, and losses are bounded by the on-chain caps.</li>
               <li><strong>Chain risk:</strong> Elysium is new and currently runs one sequencer with whitelisted validators. The stale-data guard cancels quotes when reads lag.</li>
               <li><strong>Bug bounty:</strong> report issues to <span className="mono">security@makodesk.xyz</span>.</li>
@@ -357,13 +360,13 @@ export default function DocsPage() {
           <section id="faq">
             <h2>FAQ</h2>
             <h3>Is the desk live?</h3>
-            <p>Not yet. The live market side (book, funding, mood, wick detector) is running now. The desk contract is built and tested, and it starts quoting once it is deployed on Elysium. Until then, desk figures in the app stay empty instead of being estimated.</p>
+            <p>Not yet. The live market side (book, funding, mood, wick detector) is running now. MakoDesk is deployed on Elysium mainnet in a halted state; it starts quoting once the CoreWriter interface is wired and the audit is done. Until then, desk figures in the app stay empty instead of being estimated.</p>
             <h3>Can the desk lose money?</h3>
             <p>Yes. Losses are capped per day and in total, and quoting pauses automatically when a limit is hit. Burns only come from realized profit.</p>
             <h3>Why no tax?</h3>
             <p>Taxes hurt liquidity and look like a cash grab. The desk is meant to earn from the market, not from holders.</p>
             <h3>Where is the official contract address?</h3>
-            <p>Only on makodesk.xyz, these docs and @makodeskapp.</p>
+            <p><span className="mono">{addr(cfg.contracts.token)}</span>. It is published only on makodesk.xyz, these docs and @makodeskapp.</p>
           </section>
 
           <section id="legal">

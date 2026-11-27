@@ -28,8 +28,11 @@ function withChain(base: DeskState): DeskState {
     ...base,
     mode: "live",
     sources: { ...base.sources, desk: "chain" },
-    mood: { key: m.key, label: m.label, desc: m.desc, color: m.color },
-    funding: Number(c.fundingE8) / 1e10, // E8 where 1e8 = 1%  ->  fraction
+    // until the desk has read HyperCore at least once (halted / unwired), its stored mood and
+    // funding are defaults: keep the live off-chain Phase 2 values instead
+    ...(c.coreBlock > 0n
+      ? { mood: { key: m.key, label: m.label, desc: m.desc, color: m.color }, funding: Number(c.fundingE8) / 1e10 } // E8 (1e8 = 1%) -> fraction
+      : {}),
     burned: Number(c.totalBurned) / 1e18,
     fills: deskChain.fills,
     burns: deskChain.burns,
@@ -55,14 +58,25 @@ function liveOnly(s: DeskState): DeskState {
     desk: s.sources.desk === "chain",
     token: !!cfg.contracts.token && deskChain.makoPriceHype !== null,
   };
-  let out: DeskState = { ...s, live, latency: 0, coreBlock: 0, elyBlock: 0, holders: 0 };
+  const c = deskChain.state;
+  const quoting = live.desk && !!c && !c.killed && c.coreBlock > 0n;
+  // treasury balances are not read from chain yet, so never show the engine figures
+  let out: DeskState = { ...s, live: { ...live, quoting }, latency: 0, coreBlock: 0, elyBlock: 0, holders: 0, treasury: { hype: 0, mako: 0, usd: 0 } };
+  // 24h change from Hyperliquid prevDayPx, not the engine default
+  const hm = live.market ? hyperliquid.market() : null;
+  if (hm && hm.open24h > 0) out.midOpen = hm.open24h;
   if (!live.desk) {
     out = {
       ...out,
       fills: [], burns: live.token ? out.burns : [],
       pnl: { total: 0, session: 0, history: [] },
-      treasury: { hype: 0, mako: 0, usd: 0 },
       risk: { positionPct: 0, lossPct: 0, skewPct: 50, paused: false },
+    };
+  }
+  if (!quoting) {
+    // no resting desk quotes until the desk is unhalted and wired to HyperCore
+    out = {
+      ...out,
       book: { ...out.book, bids: out.book.bids.map(l => ({ ...l, desk: false })), asks: out.book.asks.map(l => ({ ...l, desk: false })) },
       markets: out.markets.map(m => ({ ...m, book: { ...m.book, bids: m.book.bids.map(l => ({ ...l, desk: false })), asks: m.book.asks.map(l => ({ ...l, desk: false })) } })),
     };

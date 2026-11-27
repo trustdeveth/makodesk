@@ -30,7 +30,7 @@ export default function DeskPage() {
   }, [s]);
 
   if (!s) return <section className="view active"><div className="empty">Connecting…</div></section>;
-  const desk = !!s.live?.desk;
+  const deployed = !!s.live?.desk, desk = !!s.live?.quoting;
 
   const asks = s.book.asks.slice(0, 12).reverse(), bids = s.book.bids.slice(0, 12);
   const max = Math.max(...asks.map(l => l.cum), ...bids.map(l => l.cum));
@@ -54,7 +54,7 @@ export default function DeskPage() {
 
         <div className="panel">
           <div className="panel-h"><h3>Desk activity</h3>
-            <div className="r">{desk ? <span className={"pill live " + (s.risk.paused ? "warn" : "mint")}><span className="dot" />{s.risk.paused ? "Wick mode" : "Quoting"}</span> : <span className="tag">At deploy</span>}</div>
+            <div className="r">{desk ? <span className={"pill live " + (s.risk.paused ? "warn" : "mint")}><span className="dot" />{s.risk.paused ? "Wick mode" : "Quoting"}</span> : deployed ? <span className="pill warn"><span className="dot" />Halted</span> : <span className="tag">At deploy</span>}</div>
           </div>
           <div className="panel-b">
             <LineChart data={mids} color="#93d9ee" format={midFmt} height={220} />
@@ -64,7 +64,7 @@ export default function DeskPage() {
 
         <div style={{ display: "grid", gap: 16, alignContent: "start" }}>
           <div className="panel">
-            <div className="panel-h"><h3>Risk limits</h3><div className="r"><span className={"tag" + (desk ? " ok" : "")}>{desk ? "on-chain" : "at deploy"}</span></div></div>
+            <div className="panel-h"><h3>Risk limits</h3><div className="r"><span className={"tag" + (deployed ? " ok" : "")}>{deployed ? "on-chain" : "at deploy"}</span></div></div>
             <div className="panel-b">
               <div className="gauge"><div className="lbl"><span>Position used</span><b>{s.risk.positionPct.toFixed(0)}%</b></div><div className="bar"><i style={{ width: s.risk.positionPct + "%" }} /></div></div>
               <div className="gauge"><div className="lbl"><span>Daily loss budget used</span><b>{s.risk.lossPct.toFixed(0)}%</b></div><div className="bar"><i style={{ width: s.risk.lossPct + "%" }} /></div></div>
@@ -79,7 +79,7 @@ export default function DeskPage() {
               <div><span>Base spread</span><span>{MOOD_META[s.mood.key].spread}</span></div>
               <div><span>Quote refresh</span><span>~100 ms</span></div>
               <div><span>Burn share of profit</span><span>80%</span></div>
-              <div><span>Kill-switch</span><span className={desk ? "up" : ""}>{desk ? "armed" : "at deploy"}</span></div>
+              <div><span>Kill-switch</span><span className={desk ? "up" : deployed ? "down" : ""}>{desk ? "armed" : deployed ? "engaged (halted)" : "at deploy"}</span></div>
             </div>
           </div>
           <div className="panel">

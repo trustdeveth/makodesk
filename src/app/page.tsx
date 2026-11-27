@@ -11,14 +11,14 @@ import { DeskWidget } from "@/components/landing/DeskWidget";
 import { CodeCard } from "@/components/landing/CodeCard";
 
 const ROAD = [
-  { ph: "PHASE 01", h: "Surface", dep: "Elysium mainnet · live", done: true, items: ["Brand, app and docs", "Explorer verification", "Fair launch with locked LP"] },
+  { ph: "PHASE 01", h: "Surface", dep: "Elysium mainnet · live", done: true, items: ["Brand, app and docs", "Explorer verification", "Fair launch on Montra"] },
   { ph: "PHASE 02", h: "Sense", dep: "Live HyperCore data", done: true, items: ["Live Mood Engine", "Wick detector", "Real-time dashboard"] },
-  { ph: "PHASE 03", h: "Strike", dep: "Deploys when Kinetiq publishes the CoreWriter interface", done: true, now: true, badge: "Built", items: ["MakoDesk built and tested (41 tests)", "Buyback and burn loop rehearsed", "Audit package prepared"] },
+  { ph: "PHASE 03", h: "Strike", dep: "MakoDesk deployed on Elysium · quoting after CoreWriter + audit", done: true, now: true, badge: "Deployed", items: ["MakoDesk deployed and verified (43 tests)", "48-hour timelock in control", "Audit package prepared"] },
   { ph: "PHASE 04", h: "Apex", dep: "Public track record", items: ["HyperCore spot listing", "Higher caps", "Multi-market desk"] },
 ];
 
 const FAQ = [
-  ["Is the desk trading right now?", "Not yet. Phase 2 is live: HyperCore market data, the Mood Engine and the wick detector run on real data now. The MakoDesk contract is built and tested, and it deploys as soon as Kinetiq publishes the precompile and CoreWriter interfaces. From then on every fill and burn appears in the app."],
+  ["Is the desk trading right now?", "Not yet. Phase 2 is live: HyperCore market data, the Mood Engine and the wick detector run on real data now. MakoDesk is deployed on Elysium mainnet in a halted state, and it starts quoting once the CoreWriter interface is wired and the external audit is done. From then on every fill and burn appears in the app."],
   ["Why Elysium?", "Elysium is an EVM L2 for Hyperliquid with 100 ms blocks, HYPE as gas and, from Phase 2, native read and write access to HyperCore order books. A contract that makes markets on Hyperliquid isn't practical on any other chain."],
   ["Can the team take the treasury?", "No. The trading agent can't withdraw, the 20% desk allocation is held by the contract, and parameters only change through a public 48-hour timelock."],
   ["What if the desk loses money?", "Losses are capped per day and overall. When a limit is hit, quoting pauses automatically and the event is public. Burns only come from realized profit, never from principal."],

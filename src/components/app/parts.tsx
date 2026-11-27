@@ -16,7 +16,7 @@ export function Pending({ title, note, compact }: { title: string; note: string;
     </div>
   );
 }
-export const PHASE3 = "Goes live when the MakoDesk contract is deployed on Elysium.";
+export const PHASE3 = "MakoDesk is deployed on Elysium and halted. It starts quoting once CoreWriter is wired and the audit is done.";
 export const AT_LAUNCH = "Goes live when $MAKO launches on Elysium.";
 
 /** Canvas area/line chart with right-side axis labels. */

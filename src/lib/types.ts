@@ -38,7 +38,7 @@ export interface DeskState {
   /** where each part of the state comes from */
   sources: { market: "hyperliquid" | "preview"; desk: "chain" | "preview" };
   /** what is genuinely live right now; the UI shows "goes live at launch" states for the rest */
-  live: { market: boolean; desk: boolean; token: boolean };
+  live: { market: boolean; desk: boolean; token: boolean; /** desk deployed, unhalted and reading HyperCore */ quoting?: boolean };
   /** off-chain wick detector (mirrors the on-chain one in MakoDesk) */
   wick: { armed: boolean; at: number | null; dropPct: number };
 }

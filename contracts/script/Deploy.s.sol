@@ -7,23 +7,32 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {MakoDesk} from "../src/MakoDesk.sol";
 import {IHyperCoreData} from "../src/interfaces/IHyperCoreData.sol";
 import {ICoreOrderRouter} from "../src/interfaces/ICoreOrderRouter.sol";
-import {ISwapRouterV2} from "../src/interfaces/ISwapRouterV2.sol";
+import {IBuybackRouter} from "../src/interfaces/IBuybackRouter.sol";
 
-/// @notice Deploys the 48h timelock and MakoDesk with the documented launch caps.
+/// @notice Deploys the 48h TimelockController and MakoDesk (owned by the timelock, HALTED).
 ///
-///   forge script script/Deploy.s.sol --rpc-url elysium --broadcast --verify
+///   forge script script/Deploy.s.sol --rpc-url elysium --broadcast --private-key $DEPLOYER_PK
 ///
-/// Required env: MULTISIG, MAKO_TOKEN_ADDRESS, DATA_ADAPTER, ORDER_ROUTER, SWAP_ROUTER,
-///               CORE_ACCOUNT, GUARDIAN, KEEPER, HYPE_ASSET_INDEX
-/// The adapters must be the wired Elysium adapters (see src/adapters/ElysiumAdapters.sol).
+/// The deployer only pays gas: it gets no role in either contract.
+/// Required env: MULTISIG (timelock proposer + executor), GUARDIAN, KEEPER
+/// Optional env (zero until known, set later through the timelock):
+///   MAKO_TOKEN_ADDRESS  Montra token CA      -> MakoDesk.setToken (one-time)
+///   DATA_ADAPTER, ORDER_ROUTER, BUYBACK_ROUTER, CORE_ACCOUNT -> MakoDesk.setAdapters
+/// After wiring, the timelock calls resume(); until then the desk cannot quote or burn.
 contract Deploy is Script {
     function run() external returns (TimelockController timelock, MakoDesk desk) {
         address multisig = vm.envAddress("MULTISIG");
-        address data = vm.envAddress("DATA_ADAPTER");
-        address router = vm.envAddress("ORDER_ROUTER");
-        require(data.code.length > 0 && router.code.length > 0, "adapters not deployed");
-        // a wired adapter must answer; the placeholder reverts with NotWired()
-        IHyperCoreData(data).latestCoreBlock();
+        address guardian = vm.envAddress("GUARDIAN");
+        address keeper = vm.envAddress("KEEPER");
+        // A Safe is recommended; an EOA admin must be opted into explicitly.
+        require(multisig.code.length > 0 || vm.envOr("ALLOW_EOA_ADMIN", false), "MULTISIG is an EOA: set ALLOW_EOA_ADMIN=true to accept");
+
+        address token = vm.envOr("MAKO_TOKEN_ADDRESS", address(0));
+        address data = vm.envOr("DATA_ADAPTER", address(0));
+        address router = vm.envOr("ORDER_ROUTER", address(0));
+        address buyback = vm.envOr("BUYBACK_ROUTER", address(0));
+        address core = vm.envOr("CORE_ACCOUNT", address(0));
+        if (data != address(0)) IHyperCoreData(data).latestCoreBlock(); // a wired adapter must answer
 
         address[] memory roles = new address[](1);
         roles[0] = multisig;
@@ -32,14 +41,14 @@ contract Deploy is Script {
         timelock = new TimelockController(48 hours, roles, roles, address(0));
         desk = new MakoDesk(
             address(timelock),
-            IERC20(vm.envAddress("MAKO_TOKEN_ADDRESS")),
-            uint32(vm.envUint("HYPE_ASSET_INDEX")),
+            IERC20(token),
+            159, // HYPE perp index on HyperCore
             IHyperCoreData(data),
             ICoreOrderRouter(router),
-            ISwapRouterV2(vm.envAddress("SWAP_ROUTER")),
-            vm.envAddress("CORE_ACCOUNT"),
-            vm.envAddress("GUARDIAN"),
-            vm.envAddress("KEEPER"),
+            IBuybackRouter(buyback),
+            core,
+            guardian,
+            keeper,
             MakoDesk.Params({
                 maxPositionSzE8: 2_500e8, // 2,500 HYPE
                 quoteSzE8: 25e8, // start small: 25 HYPE per side
@@ -60,7 +69,6 @@ contract Deploy is Script {
         vm.stopBroadcast();
 
         console2.log("TimelockController", address(timelock));
-        console2.log("MakoDesk", address(desk));
-        console2.log("Next: seed the tip pool, bind the HyperCore account + trade-only agent, set MAKO_DESK_ADDRESS.");
+        console2.log("MakoDesk (halted)", address(desk));
     }
 }

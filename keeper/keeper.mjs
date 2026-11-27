@@ -54,11 +54,12 @@ const deskAbi = parseAbi([
   "error BadParams()",
   "error Killed()",
   "error InsufficientOutput()",
+  "error NotWired()",
+  "error TokenAlreadySet()",
 ]);
-const routerAbi = parseAbi([
-  "function WETH() view returns (address)",
-  "function getAmountsOut(uint256 amountIn, address[] path) view returns (uint256[])",
-]);
+// IBuybackRouter: venue-agnostic (Montra / Uniswap v4 adapter, or V2); quote() is called via eth_call
+const routerAbi = parseAbi(["function quote(address token, uint256 amountIn) returns (uint256)"]);
+const ZERO = "0x0000000000000000000000000000000000000000";
 
 const account = privateKeyToAccount(env("KEEPER_PRIVATE_KEY"));
 const transport = http(undefined, { timeout: 8_000, retryCount: 2 });
@@ -103,14 +104,14 @@ async function maybeBuyback() {
     read("burnHype"), read("burnBudgetE6"), read("lastMidE8"), read("swapRouter"), read("mako"),
   ]);
   if (hype === 0n || budgetE6 === 0n || midE8 === 0n) return;
+  if (mako === ZERO || routerAddr === ZERO) return; // token / buyback route not wired yet
   // HYPE affordable within the USD budget (with 1% headroom for mid drift between read and tx)
   const byBudget = (budgetE6 * 10n ** 20n * 99n) / (midE8 * 100n);
   let spend = hype < byBudget ? hype : byBudget;
   if (spend > MAX_HYPE) spend = MAX_HYPE;
   if (spend < 10n ** 15n) return; // dust
-  const weth = await pub.readContract({ address: routerAddr, abi: routerAbi, functionName: "WETH" });
-  const amounts = await pub.readContract({ address: routerAddr, abi: routerAbi, functionName: "getAmountsOut", args: [spend, [weth, mako]] });
-  const minOut = (amounts[1] * (10_000n - SLIPPAGE_BPS)) / 10_000n;
+  const { result: expected } = await pub.simulateContract({ address: routerAddr, abi: routerAbi, functionName: "quote", args: [mako, spend], account });
+  const minOut = (expected * (10_000n - SLIPPAGE_BPS)) / 10_000n;
   const deadline = (await pub.getBlock({ blockTag: "latest" })).timestamp + 120n;
   log(`buyback ${formatEther(spend)} HYPE, min ${formatEther(minOut)} MAKO`);
   try { await send("buybackAndBurn", [spend, minOut, deadline]); } catch (e) { log("buyback failed:", e.shortMessage || e.message); }

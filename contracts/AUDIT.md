@@ -18,7 +18,7 @@ Out of scope: OpenZeppelin v5.1.0 (`TimelockController`, `Ownable2Step`, `Reentr
 Toolchain: Solidity 0.8.28, `via_ir`, optimizer 2,000 runs, EVM `cancun`, Foundry.
 
 ```bash
-forge build && forge test            # 36 unit/fuzz tests + 5 stateful invariants (41 total)
+forge build && forge test            # 38 unit/fuzz tests + 5 stateful invariants (43 total)
 forge test --mt invariant -vv        # invariants only (128 runs x 64 depth)
 ```
 

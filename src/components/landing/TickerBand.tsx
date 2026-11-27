@@ -12,7 +12,7 @@ function Items({ s }: { s: DeskState }) {
     ["HYPE-PERP", fmt.usd(s.mid, 3), (s.mid / s.midOpen - 1) * 100],
     ["Funding 1h", (s.funding * 100).toFixed(4) + "%", null],
     ...(s.live?.token ? [["Burned", fmt.compact(s.burned) + " MAKO", null] as [string, string, number | null]] : []),
-    ...(s.live?.desk ? [["Desk PnL", fmt.usd(s.pnl.total, 0), null] as [string, string, number | null]] : []),
+    ...(s.live?.quoting ? [["Desk PnL", fmt.usd(s.pnl.total, 0), null] as [string, string, number | null]] : []),
     ["Wick detector", s.wick?.armed ? "Armed" : "Watching", null],
     ["HYPE 24h", fmt.pct((s.mid / s.midOpen - 1) * 100), null],
     ["Mood", s.mood.label, null],

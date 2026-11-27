@@ -6,7 +6,7 @@ const isAddr = (a: string) => /^0x[0-9a-fA-F]{40}$/.test(a);
 
 /** Runtime config, read on the server from process.env. Safe to send to the browser. */
 export function getConfig(): PublicConfig {
-  const token = env("MAKO_TOKEN_ADDRESS");
+  const token = env("MAKO_TOKEN_ADDRESS", "0xbf74a922615caf3f1e8c803851557d2d5f3172e8");
   const desk = env("MAKO_DESK_ADDRESS");
   const lp = env("MAKO_LP_ADDRESS");
   return {

@@ -98,7 +98,7 @@ function Shell({ children }: { children: React.ReactNode }) {
                 <span className="muted mono" style={{ fontSize: 11 }}>Mainnet</span>
               </div>
               <div className="kv2"><span>Market data</span><b className={s?.live?.market ? "up" : ""}>{s?.live?.market ? "Hyperliquid" : "—"}</b></div>
-              <div className="kv2"><span>Desk</span><b>{s?.live?.desk ? "Quoting" : "Deploying"}</b></div>
+              <div className="kv2"><span>Desk</span><b>{s?.live?.quoting ? "Quoting" : s?.live?.desk ? "Deployed · halted" : "Deploying"}</b></div>
               <div className="kv2"><span>Gas</span><b>HYPE</b></div>
             </div>
             <Link className="btn btn-ghost btn-sm" href="/docs">Documentation <ExternalLink className="ico ico-sm" /></Link>
