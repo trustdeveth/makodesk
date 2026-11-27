@@ -25,8 +25,8 @@ export function getConfig(): PublicConfig {
     chain: {
       chainId: Number(env("ELYSIUM_CHAIN_ID", "99901")) || 99901,
       name: "Elysium",
-      rpcUrl: env("ELYSIUM_RPC_URL", "https://rpc.elysium.example"),
-      explorer: env("ELYSIUM_EXPLORER_URL", "https://explorer.elysium.example").replace(/\/$/, ""),
+      rpcUrl: env("ELYSIUM_RPC_URL", "https://rpc.elysium.kinetiq.xyz"),
+      explorer: env("ELYSIUM_EXPLORER_URL", "https://elysium.kinetiq.xyz/explorer").replace(/\/$/, ""),
       nativeCurrency: { name: "HYPE", symbol: "HYPE", decimals: 18 },
     },
     contracts: {

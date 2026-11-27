@@ -11,7 +11,9 @@ module.exports = {
       node_args: "--env-file=../../.env",
       instances: 1,
       exec_mode: "fork",
-      env: { NODE_ENV: "production", PORT: 3000, HOSTNAME: "127.0.0.1" },
+      // DATA_DIR is pinned outside .next/standalone, which every build wipes (chat history lives there)
+      env: { NODE_ENV: "production", PORT: 3000, HOSTNAME: "127.0.0.1", DATA_DIR: __dirname + "/../data" },
+      kill_timeout: 5000, // lets the chat store flush on restart
       max_memory_restart: "512M",
       out_file: __dirname + "/../logs/out.log",
       error_file: __dirname + "/../logs/err.log",

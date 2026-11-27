@@ -19,7 +19,7 @@ export function MarketBar({ m, spec, s, onSelect }: { m: MarketState | undefined
   return (
     <div className="t-bar">
       <div className="t-mkts" role="tablist" aria-label="Markets">
-        {MARKET_LIST.map(sp => {
+        {MARKET_LIST.filter(sp => sp.symbol === spec.symbol || s?.markets.some(x => x.symbol === sp.symbol)).map(sp => {
           const mm = s?.markets.find(x => x.symbol === sp.symbol);
           return (
             <button key={sp.symbol} role="tab" aria-selected={sp.symbol === spec.symbol} className={sp.symbol === spec.symbol ? "on" : ""} onClick={() => onSelect(sp.symbol)}>
@@ -31,7 +31,7 @@ export function MarketBar({ m, spec, s, onSelect }: { m: MarketState | undefined
         })}
       </div>
       <div className="t-stats">
-        <div className="t-last"><b className={"mono " + cls(m ? m.mid - m.bar.o : 0)}>{m ? px(m.mid, spec) : "—"}</b><small>{spec.quote}</small></div>
+        <div className="t-last"><b className={"mono " + cls(m ? m.mid - m.bar.o : 0)}>{m ? px(m.mid, spec) : "—"}</b><small>{spec.quote}</small>{s?.live?.market && spec.symbol === "HYPE-PERP" && <span className="pill mint live t-src" title="Real Hyperliquid data"><span className="dot" />LIVE</span>}</div>
         <div><small>24h change</small><b className={"mono " + cls(m?.change24h ?? 0)}>{m ? fmt.pct(m.change24h) : "—"}</b></div>
         <div><small>24h high</small><b className="mono">{m ? px(m.high24h, spec) : "—"}</b></div>
         <div><small>24h low</small><b className="mono">{m ? px(m.low24h, spec) : "—"}</b></div>

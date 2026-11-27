@@ -217,3 +217,10 @@
 @media (prefers-reduced-motion: reduce) {
   .xp-ch { transition: none; }
 }
+
+/* landing page scrollbar: thin, dark teal (matches docs) */
+html:has(.xp) { scrollbar-width: thin; scrollbar-color: #1e4d5a #010608; }
+html:has(.xp)::-webkit-scrollbar { width: 10px; }
+html:has(.xp)::-webkit-scrollbar-track { background: #010608; }
+html:has(.xp)::-webkit-scrollbar-thumb { background: #163b44; border-radius: 10px; border: 3px solid #010608; }
+html:has(.xp)::-webkit-scrollbar-thumb:hover { background: #2d7388; }

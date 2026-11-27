@@ -214,7 +214,7 @@ export function Experience({ children }: { children: React.ReactNode }) {
             <span>HYPE-PERP <b>{s ? s.mid.toFixed(3) : "—"}</b></span>
             <span>Funding <b>{s ? (s.funding * 100).toFixed(4) + "%" : "—"}</b></span>
             <span>Mood <b style={{ color: s?.mood.color }}>{s?.mood.label ?? "—"}</b></span>
-            <span>Burned <b>{s ? fmt.compact(s.burned) : "—"}</b></span>
+            <span>Wick <b>{s ? (s.wick?.armed ? "Armed" : "Watching") : "—"}</b></span>
           </div>
         )}
       </div>

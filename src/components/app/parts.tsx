@@ -4,7 +4,20 @@ import { Fin } from "@/components/icons";
 import { fmt, MOOD_META } from "@/lib/format";
 import type { Burn, DeskState, Fill } from "@/lib/types";
 import { useConfig } from "@/components/providers/ConfigProvider";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Hourglass } from "lucide-react";
+
+/** Clean placeholder for data that switches on with a later phase / the token launch. */
+export function Pending({ title, note, compact }: { title: string; note: string; compact?: boolean }) {
+  return (
+    <div className={"pending" + (compact ? " compact" : "")}>
+      <span className="pending-ic"><Hourglass className="ico ico-sm" /></span>
+      <b>{title}</b>
+      <span>{note}</span>
+    </div>
+  );
+}
+export const PHASE3 = "Goes live when the MakoDesk contract is deployed on Elysium.";
+export const AT_LAUNCH = "Goes live when $MAKO launches on Elysium.";
 
 /** Canvas area/line chart with right-side axis labels. */
 export function LineChart({ data, color = "#34b7dd", format = (v: number) => v.toFixed(2), height = 260 }: {
@@ -88,9 +101,8 @@ export function FillsTable({ fills, limit }: { fills: Fill[]; limit: number }) {
   );
 }
 
-export function TxLink({ hash, preview }: { hash: string; preview: boolean }) {
+export function TxLink({ hash }: { hash: string }) {
   const cfg = useConfig();
-  if (preview) return <span className="muted">{fmt.short(hash)}</span>;
   return (
     <a href={`${cfg.chain.explorer}/tx/${hash}`} target="_blank" rel="noopener">
       {fmt.short(hash)} <ExternalLink className="ico ico-sm" style={{ display: "inline", verticalAlign: -2 }} />

@@ -11,14 +11,14 @@ import { DeskWidget } from "@/components/landing/DeskWidget";
 import { CodeCard } from "@/components/landing/CodeCard";
 
 const ROAD = [
-  { ph: "PHASE 01", h: "Surface", dep: "Elysium mainnet · live", now: true, items: ["Fair launch, LP locked", "Explorer verification", "App in preview mode"] },
-  { ph: "PHASE 02", h: "Sense", dep: "Market-data precompile", items: ["Live Mood Engine", "Wick detector", "Real-time dashboard"] },
-  { ph: "PHASE 03", h: "Strike", dep: "ElysiumCoreWriter stable", items: ["Desk quoting under caps", "MakoDesk audit", "Buyback and burn loop"] },
+  { ph: "PHASE 01", h: "Surface", dep: "Elysium mainnet · live", done: true, items: ["Brand, app and docs", "Explorer verification", "Fair launch with locked LP"] },
+  { ph: "PHASE 02", h: "Sense", dep: "Live HyperCore data", done: true, items: ["Live Mood Engine", "Wick detector", "Real-time dashboard"] },
+  { ph: "PHASE 03", h: "Strike", dep: "Deploys when Kinetiq publishes the CoreWriter interface", done: true, now: true, badge: "Built", items: ["MakoDesk built and tested (41 tests)", "Buyback and burn loop rehearsed", "Audit package prepared"] },
   { ph: "PHASE 04", h: "Apex", dep: "Public track record", items: ["HyperCore spot listing", "Higher caps", "Multi-market desk"] },
 ];
 
 const FAQ = [
-  ["Is the desk trading right now?", "Not yet. The live desk needs Elysium's Phase 2 upgrade, which adds the HyperCore precompile and ElysiumCoreWriter. Until then the app shows a clearly labelled preview. The token and liquidity are live from launch."],
+  ["Is the desk trading right now?", "Not yet. Phase 2 is live: HyperCore market data, the Mood Engine and the wick detector run on real data now. The MakoDesk contract is built and tested, and it deploys as soon as Kinetiq publishes the precompile and CoreWriter interfaces. From then on every fill and burn appears in the app."],
   ["Why Elysium?", "Elysium is an EVM L2 for Hyperliquid with 100 ms blocks, HYPE as gas and, from Phase 2, native read and write access to HyperCore order books. A contract that makes markets on Hyperliquid isn't practical on any other chain."],
   ["Can the team take the treasury?", "No. The trading agent can't withdraw, the 20% desk allocation is held by the contract, and parameters only change through a public 48-hour timelock."],
   ["What if the desk loses money?", "Losses are capped per day and overall. When a limit is hit, quoting pauses automatically and the event is public. Burns only come from realized profit, never from principal."],
@@ -107,13 +107,13 @@ export default function Home() {
             </div>
             <div className="road reveal">
               {ROAD.map(r => (
-                <div key={r.ph} className={r.now ? "now" : ""}>
-                  <div className="ph"><span>{r.ph}</span>{r.now && <span className="pill mint live"><span className="dot" />Now</span>}</div>
+                <div key={r.ph} className={(r.now ? "now " : "") + (r.done ? "done" : "")}>
+                  <div className="ph"><span>{r.ph}</span>{r.done ? <span className="pill mint"><Check className="ico ico-sm" />{"badge" in r && r.badge ? r.badge : "Complete"}</span> : null}</div>
                   <h3>{r.h}</h3>
                   <div className="dep">{r.dep}</div>
                   <ul>
                     {r.items.map(i => (
-                      <li key={i}>{r.now ? <Check className="ico" /> : <ArrowRight className="ico" />}{i}</li>
+                      <li key={i}>{r.done ? <Check className="ico" /> : <ArrowRight className="ico" />}{i}</li>
                     ))}
                   </ul>
                 </div>

@@ -95,7 +95,7 @@ export function FinCanvas() {
   return (
     <div className="fin-stage" aria-hidden="true">
       <canvas ref={ref} />
-      <span className="fin-tag a">$MAKO {live ? fmt.usd(live.makoPrice, 6) : ""}</span>
+      <span className="fin-tag a">$MAKO{live?.live?.token ? " " + fmt.usd(live.makoPrice, 6) : ""}</span>
       <span className="fin-tag b">mood: {live ? live.mood.label.toLowerCase() : "…"}</span>
     </div>
   );

@@ -20,7 +20,7 @@ export function SiteFooter() {
         </div>
         <p className="legal">
           $MAKO is a memecoin with no intrinsic value and no expectation of financial return. The desk is an experimental,
-          capped on-chain trading strategy that can lose money. Prices shown in preview mode are simulated. Nothing on this
+          capped on-chain trading strategy that can lose money. Nothing on this
           site is investment advice. Elysium, Kinetiq, Hyperliquid and HyperCore are independent third parties with no
           affiliation to Mako Desk.
         </p>

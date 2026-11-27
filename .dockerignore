@@ -6,3 +6,7 @@ legacy
 !.env.example
 .git
 npm-debug.log*
+data
+.next-*
+contracts
+keeper

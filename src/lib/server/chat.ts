@@ -60,7 +60,8 @@ class ChatHub {
   private file: string;
 
   constructor() {
-    this.file = path.join(path.resolve(process.env.DATA_DIR?.trim() || "data"), "chat.json");
+    // runtime data dir (not part of the build output)
+    this.file = path.join(path.resolve(/*turbopackIgnore: true*/ process.env.DATA_DIR?.trim() || "data"), "chat.json");
     for (const r of CHAT_ROOMS) {
       this.rooms.set(r.id, { info: { id: r.id, name: r.name, topic: r.topic, slowModeSec: 0, pinned: null }, messages: [] });
     }

@@ -1,11 +1,10 @@
 "use client";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLive } from "@/components/providers/LiveProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { CandleChart, type PriceLine } from "@/components/terminal/CandleChart";
-import { AccountTabs, MarketBar, OrderBook, OrderEntry, TradesTape, type EntryState } from "@/components/terminal/Panels";
-import { usePaper } from "@/components/terminal/usePaper";
-import { liqPrice } from "@/components/terminal/paper";
+import { MarketBar, OrderBook, TradesTape } from "@/components/terminal/Panels";
+import { TradeSoon, AccountSoon } from "@/components/app/TradeSoon";
 import { ChatPanel } from "@/components/chat/ChatPanel";
 import { MARKETS, TIMEFRAMES, isMarket, isTimeframe, type Timeframe } from "@/lib/markets";
 import type { Candle, MarketSymbol } from "@/lib/types";
@@ -68,9 +67,6 @@ export default function TerminalPage() {
   const [side, setSide] = useState<"book" | "trades">("book");
   const [bottom, setBottom] = useState<"account" | "chat">("account");
   const spec = MARKETS[market];
-  const paper = usePaper();
-  const [entry, setEntryState] = useState<EntryState>({ side: "buy", type: "market", price: "", size: "", lev: 5, reduceOnly: false });
-  const setEntry = useCallback((e: Partial<EntryState>) => setEntryState(p => ({ ...p, ...e })), []);
 
   // restore prefs (client only)
   useEffect(() => {
@@ -80,53 +76,17 @@ export default function TerminalPage() {
     if (typeof p.ma === "boolean") setShowMA(p.ma);
   }, []);
 
+  // only markets that are live can be selected (MAKO-USD lists at launch)
+  useEffect(() => { if (s && !s.markets.some(x => x.symbol === market)) setMarket("HYPE-PERP"); }, [s, market]);
   const { candles, error, m } = useCandles(market, tf);
-  const marks = useMemo(() => Object.fromEntries((s?.markets ?? []).map(x => [x.symbol, x.mid])) as Partial<Record<MarketSymbol, number>>, [s]);
 
   const selectMarket = (sym: MarketSymbol) => {
     setMarket(sym);
     writePrefs({ market: sym });
-    setEntryState(p => ({ ...p, price: "", size: "", reduceOnly: false }));
   };
 
-  const lines = useMemo<PriceLine[]>(() => {
-    const out: PriceLine[] = [];
-    const pos = paper.acc.perps[market];
-    if (pos) {
-      out.push({ px: pos.entry, color: pos.size > 0 ? "#3ee6a8" : "#ff5252", label: `${pos.size > 0 ? "LONG" : "SHORT"} ${Math.abs(pos.size)}`, dashed: false });
-      const lq = liqPrice(pos);
-      if (lq > 0) out.push({ px: lq, color: "#ffc247", label: "LIQ" });
-    }
-    if (market === "MAKO-USD" && paper.acc.mako > 0) out.push({ px: paper.acc.makoCost, color: "#34b7dd", label: "AVG COST", dashed: false });
-    for (const o of paper.acc.open) if (o.market === market) out.push({ px: o.px, color: o.side === "buy" ? "#3ee6a8" : "#ff5252", label: `${o.side.toUpperCase()} ${o.sz - o.filled}` });
-    return out;
-  }, [paper.acc, market]);
-
-  const myPrices = useMemo(() => new Set(paper.acc.open.filter(o => o.market === market).map(o => o.px.toFixed(spec.pxDecimals))), [paper.acc.open, market, spec.pxDecimals]);
-
-  const submit = () => {
-    const err = paper.submit({
-      market, side: entry.side, type: entry.type, sz: parseFloat(entry.size) || 0,
-      px: entry.type === "limit" ? parseFloat(entry.price) || 0 : undefined, lev: entry.lev, reduceOnly: entry.reduceOnly,
-    });
-    if (err) toast(err, "warn"); else setEntry({ size: "" });
-  };
-
-  const closePos = (sym: MarketSymbol, pct: number) => {
-    const sp = MARKETS[sym];
-    const d = sp.szDecimals;
-    if (sp.kind === "spot") {
-      const amt = Math.floor(paper.acc.mako * pct * 10 ** d) / 10 ** d;
-      const err = paper.submit({ market: sym, side: "sell", type: "market", sz: amt, lev: 1, reduceOnly: false });
-      if (err) toast(err, "warn");
-      return;
-    }
-    const pos = paper.acc.perps[sym];
-    if (!pos) return;
-    const amt = pct >= 1 ? Math.abs(pos.size) : Math.floor(Math.abs(pos.size) * pct * 10 ** d) / 10 ** d;
-    const err = paper.submit({ market: sym, side: pos.size > 0 ? "sell" : "buy", type: "market", sz: amt, lev: 1, reduceOnly: true });
-    if (err) toast(err, "warn");
-  };
+  const lines = useMemo<PriceLine[]>(() => [], []);
+  const myPrices = useMemo(() => new Set<string>(), []);
 
   return (
     <section className="view active term">
@@ -158,13 +118,13 @@ export default function TerminalPage() {
           </div>
           <div className="t-side-b">
             {side === "book"
-              ? <OrderBook m={m} spec={spec} myPrices={myPrices} onPick={p => setEntry({ type: "limit", price: p.toFixed(spec.pxDecimals) })} />
+              ? <OrderBook rows={20} m={m} spec={spec} myPrices={myPrices} onPick={() => {}} />
               : <TradesTape m={m} spec={spec} />}
           </div>
         </div>
 
         <div className="panel t-entry-panel">
-          <OrderEntry m={m} spec={spec} acc={paper.acc} entry={entry} setEntry={setEntry} onSubmit={submit} onReset={paper.reset} marks={marks} />
+          <TradeSoon m={m} spec={spec} />
         </div>
 
         <div className="panel t-bottom">
@@ -173,7 +133,7 @@ export default function TerminalPage() {
             <button role="tab" aria-selected={bottom === "chat"} className={bottom === "chat" ? "on" : ""} onClick={() => setBottom("chat")}>Chat</button>
           </div>
           <div className={"t-bottom-account" + (bottom === "account" ? " show" : "")}>
-            <AccountTabs acc={paper.acc} marks={marks} onCancel={paper.cancel} onCancelAll={() => paper.cancelAll()} onClose={closePos} onSelect={selectMarket} />
+            <AccountSoon />
           </div>
           <div className={"t-bottom-chat" + (bottom === "chat" ? " show" : "")}>
             <ChatPanel variant="dock" initialRoom="trading" />

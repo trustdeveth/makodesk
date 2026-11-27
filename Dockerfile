@@ -23,6 +23,10 @@ RUN addgroup -S nodejs -g 1001 && adduser -S nextjs -u 1001 -G nodejs
 COPY --from=build --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=build --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=build --chown=nextjs:nodejs /app/public ./public
+# chat history lives here; mount a volume so it survives redeploys
+RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
+ENV DATA_DIR=/app/data
+VOLUME ["/app/data"]
 USER nextjs
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \

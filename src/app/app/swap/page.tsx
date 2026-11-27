@@ -31,14 +31,14 @@ export default function SwapPage() {
 
   // server-side quote, debounced
   useEffect(() => {
-    if (!x) { setQuote(null); return; }
+    if (!x || !cfg.contracts.token) { setQuote(null); return; }
     const ctl = new AbortController();
     const t = setTimeout(() => {
       fetch(`/api/quote?side=${side}&amount=${x}&slippage=${slip}`, { signal: ctl.signal, cache: "no-store" })
         .then(r => (r.ok ? r.json() : null)).then(q => setQuote(q)).catch(() => {});
     }, 250);
     return () => { clearTimeout(t); ctl.abort(); };
-  }, [x, side, slip]);
+  }, [x, side, slip, cfg.contracts.token]);
 
   const balIn = side === "buy" ? w.hype : w.mako;
   const balOut = side === "buy" ? w.mako : w.hype;
@@ -95,7 +95,7 @@ export default function SwapPage() {
             <div className="top" style={{ marginTop: 6 }}><span>{fmt.usd((quote?.usdIn ?? 0) * (1 - (quote?.priceImpactPct ?? 0) / 100))}</span><span /></div>
           </div>
           <div className="route">
-            <div><span>Rate</span><span>{s ? `1 HYPE = ${fmt.num(s.mid / s.makoPrice, 0)} MAKO` : "—"}</span></div>
+            <div><span>Rate</span><span>{s?.live?.token && s.makoPrice > 0 ? `1 HYPE = ${fmt.num(s.mid / s.makoPrice, 0)} MAKO` : "At launch"}</span></div>
             <div><span>Min. received</span><span>{quote ? (side === "buy" ? fmt.num(quote.minOut, 0) + " MAKO" : fmt.num(quote.minOut, 6) + " HYPE") : "—"}</span></div>
             <div><span>Price impact</span><span className={quote && quote.priceImpactPct > 3 ? "down" : ""}>{quote ? quote.priceImpactPct.toFixed(2) + "%" : "—"}</span></div>
             <div><span>Network fee</span><span>~0.00002 HYPE</span></div>
@@ -119,7 +119,7 @@ export default function SwapPage() {
             <div className="params">
               <div><span>Official contract</span><span>{cfg.contracts.token ? fmt.short(cfg.contracts.token) : "Published at launch"}</span></div>
               <div><span>Pool</span><span>MAKO / HYPE</span></div>
-              <div><span>LP</span><span className="up">Locked</span></div>
+              <div><span>LP</span><span className={cfg.contracts.lp ? "up" : ""}>{cfg.contracts.lp ? "Locked" : "Locked at launch"}</span></div>
               <div><span>Tax</span><span>0% / 0%</span></div>
             </div>
           </div>

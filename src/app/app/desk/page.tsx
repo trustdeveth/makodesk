@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useLive } from "@/components/providers/LiveProvider";
-import { FillsTable, LineChart } from "@/components/app/parts";
+import { FillsTable, LineChart, PHASE3, Pending } from "@/components/app/parts";
 import { fmt, MOOD_META } from "@/lib/format";
 import type { BookLevel } from "@/lib/types";
 
@@ -29,7 +29,8 @@ export default function DeskPage() {
     setMids(hist.current);
   }, [s]);
 
-  if (!s) return <section className="view active"><div className="empty">Connecting to desk…</div></section>;
+  if (!s) return <section className="view active"><div className="empty">Connecting…</div></section>;
+  const desk = !!s.live?.desk;
 
   const asks = s.book.asks.slice(0, 12).reverse(), bids = s.book.bids.slice(0, 12);
   const max = Math.max(...asks.map(l => l.cum), ...bids.map(l => l.cum));
@@ -47,23 +48,23 @@ export default function DeskPage() {
               <div className="spread"><b>{s.mid.toFixed(3)}</b><span className="muted">{((s.book.spread / s.mid) * 10000).toFixed(1)} bps</span></div>
               {bids.map(l => <Level key={"b" + l.px} l={l} side="bid" max={max} />)}
             </div>
-            <p className="muted" style={{ fontSize: 12, marginTop: 10 }}>Highlighted rows are desk resting quotes</p>
+            <p className="muted" style={{ fontSize: 12, marginTop: 10 }}>{desk ? "Highlighted rows are desk resting quotes" : "Live HYPE-PERP book from HyperCore"}</p>
           </div>
         </div>
 
         <div className="panel">
           <div className="panel-h"><h3>Desk activity</h3>
-            <div className="r"><span className={"pill live " + (s.risk.paused ? "warn" : "mint")}><span className="dot" />{s.risk.paused ? "Wick mode" : "Quoting"}</span></div>
+            <div className="r">{desk ? <span className={"pill live " + (s.risk.paused ? "warn" : "mint")}><span className="dot" />{s.risk.paused ? "Wick mode" : "Quoting"}</span> : <span className="tag">At deploy</span>}</div>
           </div>
           <div className="panel-b">
             <LineChart data={mids} color="#93d9ee" format={midFmt} height={220} />
-            <div style={{ marginTop: 16 }}><FillsTable fills={s.fills} limit={10} /></div>
+            <div style={{ marginTop: 16 }}>{desk ? <FillsTable fills={s.fills} limit={10} /> : <Pending title="Desk fills appear here" note={PHASE3} />}</div>
           </div>
         </div>
 
         <div style={{ display: "grid", gap: 16, alignContent: "start" }}>
           <div className="panel">
-            <div className="panel-h"><h3>Risk limits</h3><div className="r"><span className="tag ok">on-chain</span></div></div>
+            <div className="panel-h"><h3>Risk limits</h3><div className="r"><span className={"tag" + (desk ? " ok" : "")}>{desk ? "on-chain" : "at deploy"}</span></div></div>
             <div className="panel-b">
               <div className="gauge"><div className="lbl"><span>Position used</span><b>{s.risk.positionPct.toFixed(0)}%</b></div><div className="bar"><i style={{ width: s.risk.positionPct + "%" }} /></div></div>
               <div className="gauge"><div className="lbl"><span>Daily loss budget used</span><b>{s.risk.lossPct.toFixed(0)}%</b></div><div className="bar"><i style={{ width: s.risk.lossPct + "%" }} /></div></div>
@@ -78,7 +79,7 @@ export default function DeskPage() {
               <div><span>Base spread</span><span>{MOOD_META[s.mood.key].spread}</span></div>
               <div><span>Quote refresh</span><span>~100 ms</span></div>
               <div><span>Burn share of profit</span><span>80%</span></div>
-              <div><span>Kill-switch</span><span className="up">armed</span></div>
+              <div><span>Kill-switch</span><span className={desk ? "up" : ""}>{desk ? "armed" : "at deploy"}</span></div>
             </div>
           </div>
           <div className="panel">

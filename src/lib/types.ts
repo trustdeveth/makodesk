@@ -35,6 +35,12 @@ export interface DeskState {
   elyBlock: number;
   risk: { positionPct: number; lossPct: number; skewPct: number; paused: boolean };
   markets: MarketState[];
+  /** where each part of the state comes from */
+  sources: { market: "hyperliquid" | "preview"; desk: "chain" | "preview" };
+  /** what is genuinely live right now; the UI shows "goes live at launch" states for the rest */
+  live: { market: boolean; desk: boolean; token: boolean };
+  /** off-chain wick detector (mirrors the on-chain one in MakoDesk) */
+  wick: { armed: boolean; at: number | null; dropPct: number };
 }
 
 export interface PublicConfig {

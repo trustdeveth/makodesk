@@ -9,7 +9,7 @@ import { getConfig } from "../config";
 const DEAD = "0x000000000000000000000000000000000000dEaD";
 const cache = new Map<string, { v: unknown; exp: number }>();
 
-async function rpc<T>(method: string, params: unknown[]): Promise<T> {
+export async function rpc<T>(method: string, params: unknown[]): Promise<T> {
   const { chain } = getConfig();
   const res = await fetch(chain.rpcUrl, {
     method: "POST",

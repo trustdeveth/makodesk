@@ -83,3 +83,25 @@
   .cards2, .brandgrid, .logo-tiles { grid-template-columns: 1fr; }
 }
 .dtoggle { display: none; }
+
+/* ---------- Scrollbars (themed, thin) ---------- */
+html:has(.docs) { scrollbar-width: thin; scrollbar-color: #1e4d5a #010608; scroll-padding-top: calc(var(--nav-h) + 16px); }
+html:has(.docs)::-webkit-scrollbar { width: 10px; }
+html:has(.docs)::-webkit-scrollbar-track { background: #010608; }
+html:has(.docs)::-webkit-scrollbar-thumb { background: #163b44; border-radius: 10px; border: 3px solid #010608; }
+html:has(.docs)::-webkit-scrollbar-thumb:hover { background: var(--cyan-deep); }
+
+/* sidebar + "on this page": hidden until hovered, so the columns stay clean */
+.dside, .dtoc { scrollbar-width: thin; scrollbar-color: transparent transparent; overscroll-behavior: contain; }
+.dside:hover, .dtoc:hover { scrollbar-color: #1e4d5a transparent; }
+.dside::-webkit-scrollbar, .dtoc::-webkit-scrollbar { width: 6px; }
+.dside::-webkit-scrollbar-track, .dtoc::-webkit-scrollbar-track { background: transparent; }
+.dside::-webkit-scrollbar-thumb, .dtoc::-webkit-scrollbar-thumb { background: transparent; border-radius: 6px; }
+.dside:hover::-webkit-scrollbar-thumb, .dtoc:hover::-webkit-scrollbar-thumb { background: #1e4d5a; }
+.dside::-webkit-scrollbar-thumb:hover, .dtoc::-webkit-scrollbar-thumb:hover { background: var(--cyan-deep); }
+
+/* code blocks + wide tables: thin horizontal bars */
+.code pre, .tw { scrollbar-width: thin; scrollbar-color: #1e4d5a transparent; }
+.code pre::-webkit-scrollbar, .tw::-webkit-scrollbar { height: 6px; }
+.code pre::-webkit-scrollbar-thumb, .tw::-webkit-scrollbar-thumb { background: #1e4d5a; border-radius: 6px; }
+.code pre::-webkit-scrollbar-track, .tw::-webkit-scrollbar-track { background: transparent; }

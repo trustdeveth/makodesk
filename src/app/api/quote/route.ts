@@ -19,6 +19,9 @@ export function GET(req: Request) {
   }
 
   const s = getDeskState();
+  if (!s.live.token || !(s.makoPrice > 0)) {
+    return NextResponse.json({ error: "trading opens at launch" }, { status: 503 });
+  }
   const hypePerMako = s.makoPrice / s.mid;
   const poolHype = 110_000;                  // illustrative depth (preview)
   const poolMako = poolHype / hypePerMako;

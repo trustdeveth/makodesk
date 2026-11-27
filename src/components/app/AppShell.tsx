@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { ArrowDownUp, BookOpen, ChartCandlestick, ExternalLink, Flame, Gauge, LayoutDashboard, MessagesSquare, TriangleAlert, Wallet, X } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { ArrowDownUp, BookOpen, ChartCandlestick, ExternalLink, Flame, Gauge, LayoutDashboard, MessagesSquare, Wallet } from "lucide-react";
 import { useLive } from "@/components/providers/LiveProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { WalletProvider, useWallet } from "./WalletProvider";
@@ -19,7 +19,6 @@ const NAV = [
   { href: "/app/burns", label: "Burn log", short: "Burns", Icon: Flame },
 ];
 const WIDE = ["/app/terminal", "/app/chat"];
-const BANNER_KEY = "mako.banner.dismissed";
 
 const errMsg = (e: unknown) => ((e as Error)?.message || "Request rejected").slice(0, 90);
 
@@ -34,11 +33,13 @@ function TopBar({ title }: { title: string }) {
         <img src="/logo.svg" alt="Mako Desk" />
       </Link>
       <h1>{title}</h1>
-      {(!s || s.mode === "preview") && (
-        <span className="pill warn live hide-xs" title="Simulated data until the HyperCore precompile is live"><span className="dot" />Preview data</span>
+      {s?.live?.market ? (
+        <span className="pill mint live hide-xs" title="Market data streams live from Hyperliquid"><span className="dot" />Live</span>
+      ) : (
+        <span className="pill hide-xs"><span className="dot" style={{ background: "var(--muted)", boxShadow: "none" }} />Connecting…</span>
       )}
       <div className="spacer" />
-      <span className="pill hide-xs num">$MAKO {s ? fmt.usd(s.makoPrice, 6) : "—"}</span>
+      {s?.live?.token && <span className="pill hide-xs num">$MAKO {fmt.usd(s.makoPrice, 6)}</span>}
       {w.address && !w.onElysium && (
         <button className="btn btn-sm" style={{ color: "var(--warn)", borderColor: "rgba(255,194,71,.45)" }} onClick={() => w.ensureNetwork().catch(e => toast(errMsg(e), "warn"))}>
           Switch to Elysium
@@ -76,9 +77,6 @@ function Shell({ children }: { children: React.ReactNode }) {
   const s = useLive();
   const active = NAV.find(n => (n.href === "/app" ? path === "/app" : path.startsWith(n.href))) ?? NAV[0];
   const wide = WIDE.includes(active.href);
-  const [bannerHidden, setBannerHidden] = useState(true);
-  useEffect(() => { try { setBannerHidden(sessionStorage.getItem(BANNER_KEY) === "1"); } catch { setBannerHidden(false); } }, []);
-  const hideBanner = () => { setBannerHidden(true); try { sessionStorage.setItem(BANNER_KEY, "1"); } catch { /* storage blocked */ } };
 
   return (
     <div className="app-root">
@@ -97,10 +95,10 @@ function Shell({ children }: { children: React.ReactNode }) {
             <div className="net">
               <div className="row between" style={{ marginBottom: 6 }}>
                 <span className="pill live" style={{ height: 22 }}><span className="dot" />Elysium</span>
-                <span className="muted mono" style={{ fontSize: 11 }}>{s ? s.latency + " ms" : "—"}</span>
+                <span className="muted mono" style={{ fontSize: 11 }}>Mainnet</span>
               </div>
-              <div className="kv2"><span>L2 block</span><b>{s ? "#" + fmt.num(s.elyBlock) : "—"}</b></div>
-              <div className="kv2"><span>HyperCore</span><b>{s ? "#" + fmt.num(s.coreBlock) : "—"}</b></div>
+              <div className="kv2"><span>Market data</span><b className={s?.live?.market ? "up" : ""}>{s?.live?.market ? "Hyperliquid" : "—"}</b></div>
+              <div className="kv2"><span>Desk</span><b>{s?.live?.desk ? "Quoting" : "Deploying"}</b></div>
               <div className="kv2"><span>Gas</span><b>HYPE</b></div>
             </div>
             <Link className="btn btn-ghost btn-sm" href="/docs">Documentation <ExternalLink className="ico ico-sm" /></Link>
@@ -110,17 +108,6 @@ function Shell({ children }: { children: React.ReactNode }) {
         <div className="main">
           <TopBar title={active.label} />
           <div className={"content" + (wide ? " wide" : "")}>
-            {(!s || s.mode === "preview") && !bannerHidden && (
-              <div className="banner">
-                <TriangleAlert className="ico" style={{ color: "var(--warn)" }} />
-                <div>
-                  <b>Preview mode.</b> The desk goes live with Elysium&apos;s Phase 2 upgrade, which adds the HyperCore precompile and
-                  ElysiumCoreWriter. Until then, desk, book and burn data are <u>simulated</u> to show how the desk will work. Wallet,
-                  network and balances are real. Terminal orders are paper trades. <Link href="/docs#roadmap">See roadmap</Link>
-                </div>
-                <button className="banner-x" aria-label="Dismiss" onClick={hideBanner}><X className="ico ico-sm" /></button>
-              </div>
-            )}
             {children}
           </div>
         </div>

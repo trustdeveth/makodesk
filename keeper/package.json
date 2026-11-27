@@ -1,0 +1,14 @@
+{
+  "name": "mako-keeper",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Public fallback keeper for MakoDesk: poke, settle, buyback & burn.",
+  "scripts": {
+    "start": "node --env-file=../.env --env-file-if-exists=.env keeper.mjs"
+  },
+  "dependencies": {
+    "viem": "2.21.54"
+  },
+  "engines": { "node": ">=22" }
+}

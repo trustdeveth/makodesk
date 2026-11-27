@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
-import { getDeskState } from "@/lib/server/source";
+import { getDeskState, sourceStatus } from "@/lib/server/source";
 import { getConfig } from "@/lib/config";
+import { chat } from "@/lib/server/chat";
+import { totalConns } from "@/lib/server/ratelimit";
 
 export const dynamic = "force-dynamic";
 
@@ -8,13 +10,19 @@ export const dynamic = "force-dynamic";
 export function GET() {
   const s = getDeskState();
   const cfg = getConfig();
+  const engineAgeMs = Date.now() - s.t;
+  const ok = engineAgeMs < 10_000;
   return NextResponse.json({
-    ok: true,
+    ok,
     uptimeSec: Math.round(process.uptime()),
     mode: s.mode,
-    engineAgeMs: Date.now() - s.t,
+    sources: s.sources,
+    feeds: sourceStatus(),
+    engineAgeMs,
+    streams: totalConns(),
+    chat: chat.stats(),
     chainId: cfg.chain.chainId,
     tokenConfigured: !!cfg.contracts.token,
     deskConfigured: !!cfg.contracts.desk,
-  });
+  }, { status: ok ? 200 : 503, headers: { "Cache-Control": "no-store" } });
 }

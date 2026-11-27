@@ -1,7 +1,9 @@
 import "server-only";
 import type { BookLevel, Candle, DeskState, MarketState, MarketSymbol, Trade } from "../types";
 import { MARKETS, TIMEFRAMES, type MarketSpec, type Timeframe } from "../markets";
-import { moodFor } from "../moods";
+import { MOODS, moodFor } from "../moods";
+import { hyperliquid } from "./hyperliquid";
+import { deskChain } from "./deskChain";
 
 /**
  * Preview market engine.
@@ -254,7 +256,11 @@ class Engine {
       elyBlock: 18_221_904,
       risk: { positionPct: 30, lossPct: 12, skewPct: 50, paused: false },
       markets: [],
+      sources: { market: "preview", desk: "preview" },
+      live: { market: false, desk: false, token: false },
+      wick: { armed: false, at: null, dropPct: 0 },
     };
+    hyperliquid.start();
     this.s.makoChange = +mako.state().change24h.toFixed(2);
     this.buildBooks();
     this.s.treasury.usd = this.s.treasury.hype * this.s.mid + this.s.treasury.mako * this.s.makoPrice;
@@ -272,7 +278,35 @@ class Engine {
   }
 
   publishMarkets() {
-    this.s.markets = [this.markets["HYPE-PERP"].state(), this.markets["MAKO-USD"].state()];
+    const live = hyperliquid.market();
+    this.s.markets = [live ?? this.markets["HYPE-PERP"].state(), this.markets["MAKO-USD"].state()];
+    this.s.sources.market = live ? "hyperliquid" : "preview";
+    if (live) {
+      // legacy desk view reads s.book / s.trades
+      this.s.book = { bids: live.book.bids.slice(0, 18), asks: live.book.asks.slice(0, 18), spread: live.book.spread };
+      this.s.trades = live.trades.slice(0, 24);
+    }
+  }
+
+  /** Off-chain wick detector: same rule as MakoDesk (drop within a short window + forced flow). */
+  private wickRing: { t: number; mid: number }[] = [];
+  private breachUntil = 0;
+  senseLive(now: number, mid: number) {
+    const W = Number(process.env.WICK_WINDOW_MS) || 3_000;
+    const DROP = Number(process.env.WICK_DROP_PCT) || 1.5;
+    const FLOW = Number(process.env.WICK_FLOW_USD) || 1_000_000;
+    this.wickRing.push({ t: now, mid });
+    while (this.wickRing.length && this.wickRing[0].t < now - W) this.wickRing.shift();
+    const hi = Math.max(...this.wickRing.map(x => x.mid));
+    const dropPct = hi > 0 ? ((hi - mid) / hi) * 100 : 0;
+    if (dropPct >= DROP && hyperliquid.flowUsd(W) >= FLOW) {
+      if (now >= this.breachUntil) this.s.wick.at = now;
+      this.breachUntil = now + 5 * 60_000;
+      this.wickArmed = true;
+    }
+    this.s.wick = { armed: now < this.breachUntil, at: this.s.wick.at, dropPct: +dropPct.toFixed(3) };
+    const breach = MOODS.find(m => m.key === "breach")!;
+    this.s.mood = now < this.breachUntil ? { key: breach.key, label: breach.label, desc: breach.desc, color: breach.color } : moodFor(this.s.funding);
   }
 
   step() {
@@ -281,23 +315,32 @@ class Engine {
     this.tick++;
     s.t = now;
 
-    let shock = gauss() * 0.018;
-    if (Math.random() < 0.003) { shock = -rand(0.35, 0.9); this.wickArmed = true; }
-    s.mid = Math.max(5, s.mid + shock + (38.4 - s.mid) * 0.002);
+    const live = hyperliquid.market();
+    if (live && hyperliquid.ctx) {
+      // Phase 2: real HYPE-PERP market, real funding, real mood + wick detector
+      s.mid = live.mid;
+      s.funding = hyperliquid.ctx.funding;
+      this.senseLive(now, live.mid);
+    } else {
+      let shock = gauss() * 0.018;
+      if (Math.random() < 0.003) { shock = -rand(0.35, 0.9); this.wickArmed = true; }
+      s.mid = Math.max(5, s.mid + shock + (38.4 - s.mid) * 0.002);
+      s.funding += gauss() * 0.00025 + (0.0012 - s.funding) * 0.01;
+      if (this.wickArmed) s.funding = Math.max(s.funding, 0.013);
+      s.mood = moodFor(s.funding);
+      s.wick = { armed: this.wickArmed, at: this.wickArmed ? now : s.wick.at, dropPct: 0 };
+    }
 
-    s.funding += gauss() * 0.00025 + (0.0012 - s.funding) * 0.01;
-    if (this.wickArmed) s.funding = Math.max(s.funding, 0.013);
-    s.mood = moodFor(s.funding);
-
-    // MAKO: small log-normal noise, mean-reverting toward a slow anchor (no runaway drift)
-    s.makoPrice = Math.max(0.0001, s.makoPrice * Math.exp(gauss() * 0.0012 + Math.log(0.0042 / s.makoPrice) * 0.0004));
+    // MAKO: real price from the LP pair once configured; otherwise mean-reverting preview noise
+    if (deskChain.makoPriceHype !== null) s.makoPrice = deskChain.makoPriceHype * s.mid;
+    else s.makoPrice = Math.max(0.0001, s.makoPrice * Math.exp(gauss() * 0.0012 + Math.log(0.0042 / s.makoPrice) * 0.0004));
     s.latency = Math.round(150 + Math.abs(gauss()) * 90);
     s.coreBlock += 3 + Math.round(Math.random() * 2);
     s.elyBlock += 4;
 
     this.markets["HYPE-PERP"].step(now, +s.mid.toFixed(3));
     this.markets["MAKO-USD"].step(now, +s.makoPrice.toFixed(6));
-    s.trades = this.markets["HYPE-PERP"].trades.slice(0, 24);
+    if (!live) s.trades = this.markets["HYPE-PERP"].trades.slice(0, 24);
 
     if (Math.random() < 0.3) {
       const fs = Math.random() < 0.5 ? "buy" : "sell";
@@ -365,7 +408,7 @@ class Engine {
 
 const g = globalThis as unknown as { __makoEngine?: Engine; __makoEngineV?: number };
 // bump when the Engine shape changes so dev hot-reload picks up a fresh instance
-const VERSION = 2;
+const VERSION = 3;
 if (g.__makoEngine && g.__makoEngineV !== VERSION) {
   if (g.__makoEngine.timer) clearInterval(g.__makoEngine.timer);
   g.__makoEngine = undefined;

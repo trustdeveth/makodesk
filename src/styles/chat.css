@@ -129,4 +129,5 @@ img.ch-av { background: var(--bg-2); padding: 5px; }
   .ch-actions { display: flex; position: static; grid-column: 2; justify-self: start; margin: 2px 0 2px; box-shadow: none; opacity: 0; height: 0; overflow: hidden; padding: 0; border: 0; }
   .ch-msg:active .ch-actions, .ch-msg:focus-within .ch-actions { opacity: 1; height: auto; padding: 2px; border: 1px solid var(--line); }
   .ch-input textarea { font-size: 16px; } /* prevents iOS zoom */
+  .ch-signin.compact { grid-template-columns: minmax(0, 1fr); }
 }

@@ -49,8 +49,8 @@
 .t-book, .t-tape { font-family: var(--font-mono); font-size: 12px; font-variant-numeric: tabular-nums; display: flex; flex-direction: column; min-height: 0; flex: 1; }
 .t-book-h { display: grid; grid-template-columns: 1fr 1fr 1fr; padding: 8px 12px 4px; color: var(--faint); font-size: 11px; font-family: var(--font-body); }
 .t-book-h span:nth-child(n+2) { text-align: right; }
-.t-book-side { display: flex; flex-direction: column; }
-.t-book-side.asks { justify-content: flex-end; flex: 1; }
+.t-book-side { display: flex; flex-direction: column; flex: 1 1 0; min-height: 0; overflow: hidden; }
+.t-book-side.asks { justify-content: flex-end; }
 .t-book .lv { display: grid; grid-template-columns: 1fr 1fr 1fr; padding: 1.5px 12px; position: relative; border: 0; background: transparent; text-align: left; font: inherit; color: var(--text-2); width: 100%; }
 .t-book .lv:hover { background: rgba(147, 217, 238, .06); }
 .t-book .lv span { position: relative; }
@@ -60,10 +60,10 @@
 .t-book .ask .px { color: var(--ask); } .t-book .ask i { background: var(--ask); }
 .t-book .bid .px { color: var(--bid); } .t-book .bid i { background: var(--bid); }
 .t-book .mine { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--warn); margin-right: 5px; vertical-align: 1px; }
-.t-spread { display: flex; justify-content: space-between; align-items: baseline; padding: 7px 12px; border-block: 1px solid var(--line); margin: 3px 0; }
+.t-spread { flex: none; display: flex; justify-content: space-between; align-items: baseline; padding: 7px 12px; border-block: 1px solid var(--line); margin: 3px 0; }
 .t-spread b { font-size: 15px; }
 .t-spread span { font-size: 11px; }
-.t-book-f { display: flex; gap: 8px; align-items: center; padding: 8px 12px; border-top: 1px solid var(--line); margin-top: auto; }
+.t-book-f { display: flex; gap: 8px; align-items: center; padding: 8px 12px; border-top: 1px solid var(--line); flex: none; }
 .t-book-f select { background: var(--bg-2); border: 1px solid var(--line); border-radius: 6px; padding: 2px 6px; font-size: 11px; font-family: var(--font-mono); }
 .t-ratio { position: relative; flex: 1; height: 18px; border-radius: 4px; overflow: hidden; background: var(--ask-dim); display: flex; justify-content: space-between; align-items: center; padding: 0 6px; font-size: 10px; }
 .t-ratio i { position: absolute; left: 0; top: 0; bottom: 0; background: rgba(62, 230, 168, .18); }
@@ -73,7 +73,9 @@
 .t-tape-r span:nth-child(n+2) { text-align: right; }
 
 /* order entry */
-.t-entry { padding: 12px; display: grid; gap: 10px; align-content: start; }
+.t-entry { padding: 12px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; align-content: start; }
+.t-entry > *, .t-entry .t-field input { min-width: 0; }
+.t-entry-panel { min-width: 0; overflow: hidden; }
 .t-side { display: grid; grid-template-columns: 1fr 1fr; padding: 3px; gap: 3px; border-radius: 10px; background: var(--bg-2); border: 1px solid var(--line); }
 .t-side button { height: 34px; border: 0; border-radius: 7px; background: transparent; font-size: 13px; font-weight: 600; color: var(--muted); }
 .t-side button.on.buy { background: rgba(62, 230, 168, .16); color: var(--bid); }
@@ -144,9 +146,13 @@ button.t-unit:hover { background: var(--surface-2); }
   .t-stats { gap: 14px; }
   .t-mkts { width: 100%; }
   .t-mkts button { flex: 1; justify-content: center; padding: 0 8px; }
+  .t-mkts button { white-space: nowrap; }
+  .t-mkts button .tag { display: none; }
   .t-bottom { grid-template-columns: minmax(0, 1fr); }
-  .t-bottom-switch { display: inline-flex; margin: 8px; justify-self: start; }
+  .t-bottom-switch { display: inline-flex; margin: 8px; justify-self: start; align-self: start; }
   .t-bottom-account, .t-bottom-chat { display: none; border-left: 0; }
   .t-bottom-account.show, .t-bottom-chat.show { display: flex; }
   .t-bottom-chat { height: 480px; max-height: none; }
 }
+
+.t-src { height: 20px; font-size: 10px; padding: 0 7px; margin-left: 6px; align-self: center; }
