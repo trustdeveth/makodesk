@@ -113,6 +113,9 @@
 .xp-nav a, .xp-sound { font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-2); transition: color .2s; }
 .xp-nav a:hover, .xp-sound:hover { color: #fff; }
 .xp-head-r { margin-left: auto; display: flex; align-items: center; gap: 22px; }
+.xp-x { display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 8px; color: var(--text-2); border: 1px solid rgba(255,255,255,.18); transition: color .2s, border-color .2s, background .2s; }
+.xp-x svg { width: 15px; height: 15px; }
+.xp-x:hover { color: #fff; border-color: rgba(255,255,255,.5); background: rgba(255,255,255,.06); }
 .xp-sound { display: inline-flex; align-items: center; gap: 10px; border: 0; background: transparent; padding: 0; }
 .xp-wave { width: 28px; height: 12px; color: var(--cyan); }
 .xp-wave path { stroke-dasharray: 3 2; }

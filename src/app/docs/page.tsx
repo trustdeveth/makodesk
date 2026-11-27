@@ -119,7 +119,7 @@ export default function DocsPage() {
               <tr><td>Ticker</td><td className="mono">$MAKO</td><td>Some unrelated Solana tokens use the same ticker. Always verify the Elysium contract address.</td></tr>
               <tr><td>Tagline</td><td>The memecoin that makes markets.</td><td></td></tr>
               <tr><td>Domain</td><td className="mono">makodesk.xyz</td><td>Backup domains: <span className="mono">makodesk.trade</span>, <span className="mono">makodesk.fun</span></td></tr>
-              <tr><td>X (Twitter)</td><td className="mono">@makodesk</td><td>Contract address is posted here and on the website only</td></tr>
+              <tr><td>X (Twitter)</td><td className="mono">@makodeskapp</td><td>Contract address is posted here and on the website only</td></tr>
               <tr><td>Telegram</td><td className="mono">t.me/makodesk</td><td>Admins never DM first</td></tr>
             </tbody></table></div>
           </section>
@@ -187,7 +187,7 @@ export default function DocsPage() {
             <ul>
               <li>The HyperCore agent can <strong>place and cancel orders only</strong>. It has no transfer or withdraw permission.</li>
               <li>Desk capital lives in the contract and its dedicated HyperCore sub-account, never in a team wallet.</li>
-              <li>Parameter changes go through a <strong>48-hour timelock</strong> and are announced on @makodesk before they take effect.</li>
+              <li>Parameter changes go through a <strong>48-hour timelock</strong> and are announced on @makodeskapp before they take effect.</li>
             </ul>
           </section>
 
@@ -275,7 +275,7 @@ export default function DocsPage() {
 
           <section id="contracts">
             <h2>Contracts</h2>
-            <p>Addresses are published here, on makodesk.xyz and on @makodesk at deployment. Treat any address from another source as a scam.</p>
+            <p>Addresses are published here, on makodesk.xyz and on @makodeskapp at deployment. Treat any address from another source as a scam.</p>
             <div className="tw"><table className="dtable"><tbody>
               <tr><th>Contract</th><th>Address</th><th>Status</th></tr>
               <tr><td>$MAKO token</td><td className="mono">{addr(cfg.contracts.token)}</td><td>Phase 1</td></tr>
@@ -341,7 +341,7 @@ export default function DocsPage() {
             <h3>Why no tax?</h3>
             <p>Taxes hurt liquidity and look like a cash grab. The desk is meant to earn from the market, not from holders.</p>
             <h3>Where is the official contract address?</h3>
-            <p>Only on makodesk.xyz, these docs and @makodesk.</p>
+            <p>Only on makodesk.xyz, these docs and @makodeskapp.</p>
           </section>
 
           <section id="legal">

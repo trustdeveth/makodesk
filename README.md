@@ -7,7 +7,7 @@
 | Project | **Mako Desk** |
 | Token / Ticker | **Mako / $MAKO** |
 | Domain | **makodesk.xyz** |
-| X | **@makodesk** |
+| X | **@makodeskapp** |
 
 A Next.js 16 app (App Router, TypeScript) with both the frontend and backend in one server.
 

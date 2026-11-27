@@ -5,6 +5,8 @@ import Lenis from "lenis";
 import "lenis/dist/lenis.css";
 import { ArrowRight } from "lucide-react";
 import { useLive } from "@/components/providers/LiveProvider";
+import { useConfig } from "@/components/providers/ConfigProvider";
+import { XLogo } from "@/components/icons";
 import { fmt } from "@/lib/format";
 import { OceanAudio } from "./audio";
 import { Gate } from "./Gate";
@@ -41,6 +43,7 @@ export function Experience({ children }: { children: React.ReactNode }) {
   const [pagePct, setPagePct] = useState(0);
   const [webgl, setWebgl] = useState(true);
   const s = useLive();
+  const cfg = useConfig();
 
   // skip the gate if already entered this session
   useEffect(() => {
@@ -176,6 +179,7 @@ export function Experience({ children }: { children: React.ReactNode }) {
           <Link href="/#token">Token</Link>
         </nav>
         <div className="xp-head-r">
+          <a className="xp-x" href={cfg.brand.xUrl} target="_blank" rel="noopener" aria-label={"Mako Desk on X (@" + cfg.brand.x + ")"}><XLogo /></a>
           <button className="xp-sound" onClick={toggleSound} aria-pressed={sound}>Sound {sound ? "on" : "off"} <SoundWave on={sound} /></button>
           <Link className="xp-hbtn primary sm" href="/app"><span>Launch app</span></Link>
         </div>

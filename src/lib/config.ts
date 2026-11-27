@@ -18,8 +18,8 @@ export function getConfig(): PublicConfig {
       ticker: "MAKO",
       tagline: "The memecoin that makes markets.",
       domain: "makodesk.xyz",
-      x: "makodesk",
-      xUrl: env("MAKO_X_URL", "https://x.com/makodesk"),
+      x: "makodeskapp",
+      xUrl: env("MAKO_X_URL", "https://x.com/makodeskapp"),
       telegramUrl: env("MAKO_TELEGRAM_URL", "https://t.me/makodesk"),
     },
     chain: {

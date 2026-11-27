@@ -22,7 +22,7 @@ const FAQ = [
   ["Why Elysium?", "Elysium is an EVM L2 for Hyperliquid with 100 ms blocks, HYPE as gas and, from Phase 2, native read and write access to HyperCore order books. A contract that makes markets on Hyperliquid isn't practical on any other chain."],
   ["Can the team take the treasury?", "No. The trading agent can't withdraw, the 20% desk allocation is held by the contract, and parameters only change through a public 48-hour timelock."],
   ["What if the desk loses money?", "Losses are capped per day and overall. When a limit is hit, quoting pauses automatically and the event is public. Burns only come from realized profit, never from principal."],
-  ["How do I buy $MAKO?", "Bridge HYPE to Elysium, open the app, connect your wallet and swap. The official contract address is posted only on makodesk.xyz and @makodesk."],
+  ["How do I buy $MAKO?", "Bridge HYPE to Elysium, open the app, connect your wallet and swap. The official contract address is posted only on makodesk.xyz and @makodeskapp."],
 ];
 
 export default function Home() {
@@ -79,7 +79,7 @@ export default function Home() {
             </div>
             <div className="ca-row">
               <div className="ca-chip">
-                <span>{ca ? "CA: " + ca : "CA: published at launch on @makodesk"}</span>
+                <span>{ca ? "CA: " + ca : "CA: published at launch on @makodeskapp"}</span>
                 <CopyButton text={ca} />
               </div>
               <Link className="btn btn-dark btn-lg" href="/app/swap">Buy $MAKO <ArrowRight className="ico ico-sm" /></Link>

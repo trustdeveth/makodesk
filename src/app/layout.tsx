@@ -30,7 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: "Mako Desk",
       type: "website",
     },
-    twitter: { card: "summary_large_image", site: "@makodesk" },
+    twitter: { card: "summary_large_image", site: "@makodeskapp" },
   };
 }
 
