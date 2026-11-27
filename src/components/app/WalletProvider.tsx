@@ -17,6 +17,7 @@ interface WalletApi extends WalletState {
   connect(): Promise<void>;
   ensureNetwork(): Promise<void>;
   watchToken(): Promise<void>;
+  signMessage(message: string): Promise<{ address: string; signature: string }>;
 }
 
 const Ctx = createContext<WalletApi | null>(null);
@@ -112,8 +113,24 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     });
   }, [cfg]);
 
+  /** EIP-191 personal_sign. Connects first if needed. */
+  const signMessage = useCallback(async (message: string) => {
+    const p = provider.current;
+    if (!p) throw new Error("No wallet found. Install Rabby or MetaMask.");
+    let address = st.address;
+    if (!address) {
+      const a = (await p.request({ method: "eth_requestAccounts" })) as string[];
+      address = a[0] ?? null;
+      if (!address) throw new Error("No account selected");
+      await refresh(address, parseInt((await p.request({ method: "eth_chainId" })) as string, 16));
+    }
+    const hex = "0x" + Array.from(new TextEncoder().encode(message), b => b.toString(16).padStart(2, "0")).join("");
+    const signature = (await p.request({ method: "personal_sign", params: [hex, address] })) as string;
+    return { address, signature };
+  }, [st.address, refresh]);
+
   return (
-    <Ctx.Provider value={{ ...st, onElysium: st.chainId === cfg.chain.chainId, connect, ensureNetwork, watchToken }}>
+    <Ctx.Provider value={{ ...st, onElysium: st.chainId === cfg.chain.chainId, connect, ensureNetwork, watchToken, signMessage }}>
       {children}
     </Ctx.Provider>
   );

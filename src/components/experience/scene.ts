@@ -246,28 +246,26 @@ float fnoise(vec3 x){
 // that curves slightly and sways gently. Particles fill the silhouette evenly.
 float gFlameA = 1.0;
 vec3 flamePos(vec4 r, float t, out float heat, out float blue){
-  float h = fract(r.y + t * 0.08);                         // slow upward drift keeps it alive
-  const float B = 0.3;                                     // bulb height fraction
-  float w = h < B ? sqrt(max(0.0, 1.0 - pow((B - h) / B, 2.0)))
-                  : pow(cos((h - B) / (1.0 - B) * 1.5707963), 1.25);
+  float h = fract(r.y + t * 0.1);                          // particles rise through the flame
   float ang = r.z * 6.2831853;
-  float rad = sqrt(fract(r.x * 7.13 + r.z * 3.1));        // uniform fill of each cross-section
-  // centre line: tip leans and sways a little
-  float sway = sin(t * 1.3) * 0.18 + (fnoise(vec3(0.0, h * 2.0 - t * 1.2, 3.0)) - 0.5) * 0.35;
-  float cx = (0.35 + sway) * pow(h, 2.2);
-  float R = 1.75 * w;
-  gFlameA = clamp(w * w, 0.08, 1.0) * 0.72;                // even visual density: brightness follows cross-section area
-  // full round volume (not a flat slab) + small vertical jitter so no layer bunches up
-  vec3 p = vec3(cx + cos(ang) * R * rad, h * 6.0 + (fract(r.x * 13.7 + r.w * 5.1) - 0.5) * 0.25, sin(ang) * R * rad);
-  // sparks above the tip
-  float ember = step(0.97, fract(r.w * 5.3 + r.x));
-  float eh = fract(r.y * 1.7 + t * 0.12);
-  vec3 ep = vec3(0.35 + (fnoise(vec3(r.x * 9.0, eh * 2.0 - t * 0.5, 1.0)) - 0.5) * 2.0 * eh, 6.2 + eh * 2.5, (r.z - 0.5) * 0.8);
-  p = mix(p, ep, ember);
-  p.y -= 3.3;
-  // colour: hot core (low, centre) -> cooler edges and tip
-  // heat mostly by height (fade only at the tip), slightly cooler at the outer edge
-  heat = clamp(0.06 + h * 0.84 + rad * 0.1 + ember * 0.3, 0.0, 1.0);
+  float rad = sqrt(fract(r.x * 7.13 + r.z * 3.1));
+  // silhouette: round base (bulb), full body, smooth taper to the tip
+  const float B = 0.22;
+  float w = h < B ? sqrt(max(0.0, 1.0 - pow((B - h) / B, 2.0)))
+                  : pow(cos((h - B) / (1.0 - B) * 1.5707963), 1.9);   // slimmer upper body, sharp tip
+  // organic edges: lobes that travel upward, stronger higher up
+  float n = fnoise(vec3(cos(ang) * 1.3 + 2.0, sin(ang) * 1.3, h * 2.6 - t * 1.6));
+  w *= mix(1.0, 0.45 + 1.1 * n, smoothstep(0.12, 0.6, h));   // licking, wavy edges
+  // flowing centre line: gentle S-curve that drifts with time
+  float cx = (sin(t * 1.1 + h * 3.0) * 0.45 + (fnoise(vec3(0.0, h * 2.0 - t * 1.3, 5.0)) - 0.5) * 0.9) * pow(h, 1.4);
+  float cz = (fnoise(vec3(3.0, h * 2.0 - t * 1.1, 1.0)) - 0.5) * 0.5 * pow(h, 1.6);
+  float R = 1.9 * w;
+  vec3 p = vec3(cx + cos(ang) * R * rad, h * 7.0, cz + sin(ang) * R * rad);
+  p.y += (fract(r.x * 13.7 + r.w * 5.1) - 0.5) * 0.2;
+  p.y -= 3.8;
+  gFlameA = clamp(w * 1.3, 0.3, 1.0);
+  // yellow-white core low and inside, orange body, red tip
+  heat = clamp(0.04 + h * 0.82 + rad * 0.18, 0.0, 1.0);
   blue = 0.0;
   return p;
 }

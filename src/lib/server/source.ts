@@ -1,5 +1,6 @@
 import "server-only";
-import type { DeskState } from "../types";
+import type { Candle, DeskState, MarketSymbol } from "../types";
+import type { Timeframe } from "../markets";
 import { engine } from "./engine";
 
 /**
@@ -17,4 +18,8 @@ export function getDeskState(): DeskState {
 
 export function subscribeDesk(fn: (s: DeskState) => void) {
   return engine.subscribe(fn);
+}
+
+export function getCandles(market: MarketSymbol, tf: Timeframe, limit: number): Candle[] {
+  return engine.candles(market, tf, limit);
 }

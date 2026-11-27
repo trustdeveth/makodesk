@@ -34,6 +34,7 @@ export interface DeskState {
   coreBlock: number;
   elyBlock: number;
   risk: { positionPct: number; lossPct: number; skewPct: number; paused: boolean };
+  markets: MarketState[];
 }
 
 export interface PublicConfig {
@@ -45,3 +46,33 @@ export interface PublicConfig {
   links: { swap: string; bridge: string; chart: string };
   tokenomics: { supply: number; split: { label: string; pct: number; note: string }[]; team: number; tax: number; burnShare: number };
 }
+
+/* ---------- Markets / terminal ---------- */
+export type MarketSymbol = "HYPE-PERP" | "MAKO-USD";
+export interface Candle { t: number; o: number; h: number; l: number; c: number; v: number }
+export interface MarketState {
+  symbol: MarketSymbol;
+  mid: number;
+  open24h: number;
+  high24h: number;
+  low24h: number;
+  vol24h: number;      // base units
+  change24h: number;   // percent
+  book: { bids: BookLevel[]; asks: BookLevel[]; spread: number };
+  trades: Trade[];
+  bar: Candle;         // current 1m candle
+}
+
+/* ---------- Chat ---------- */
+export type ChatRoomId = "general" | "trading" | "alpha" | "support";
+export interface ChatAuthor { id: string; name: string; kind: "wallet" | "guest"; admin?: boolean }
+export interface ChatMessage {
+  id: string;
+  room: ChatRoomId;
+  t: number;
+  author: ChatAuthor;
+  text: string;
+  replyTo?: { id: string; name: string; text: string };
+}
+export interface ChatRoomInfo { id: ChatRoomId; name: string; topic: string; slowModeSec: number; pinned: ChatMessage | null }
+export interface ChatSession { address: string | null; guestName: string | null; authorId: string | null; name: string | null; admin: boolean; allowGuests: boolean }

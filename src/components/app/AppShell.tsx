@@ -1,20 +1,25 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
-import { ArrowDownUp, BookOpen, ExternalLink, Flame, Gauge, LayoutDashboard, TriangleAlert, Wallet } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowDownUp, BookOpen, ChartCandlestick, ExternalLink, Flame, Gauge, LayoutDashboard, MessagesSquare, TriangleAlert, Wallet, X } from "lucide-react";
 import { useLive } from "@/components/providers/LiveProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { WalletProvider, useWallet } from "./WalletProvider";
+import { ChatProvider } from "@/components/chat/ChatProvider";
 import { fmt } from "@/lib/format";
 
 const NAV = [
-  { href: "/app", label: "Overview", short: "Overview", Icon: LayoutDashboard },
+  { href: "/app", label: "Overview", short: "Home", Icon: LayoutDashboard },
+  { href: "/app/terminal", label: "Terminal", short: "Trade", Icon: ChartCandlestick },
+  { href: "/app/chat", label: "Chat", short: "Chat", Icon: MessagesSquare },
   { href: "/app/desk", label: "Desk", short: "Desk", Icon: BookOpen },
   { href: "/app/swap", label: "Swap", short: "Swap", Icon: ArrowDownUp },
   { href: "/app/mood", label: "Mood Engine", short: "Mood", Icon: Gauge },
   { href: "/app/burns", label: "Burn log", short: "Burns", Icon: Flame },
 ];
+const WIDE = ["/app/terminal", "/app/chat"];
+const BANNER_KEY = "mako.banner.dismissed";
 
 const errMsg = (e: unknown) => ((e as Error)?.message || "Request rejected").slice(0, 90);
 
@@ -70,6 +75,10 @@ function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const s = useLive();
   const active = NAV.find(n => (n.href === "/app" ? path === "/app" : path.startsWith(n.href))) ?? NAV[0];
+  const wide = WIDE.includes(active.href);
+  const [bannerHidden, setBannerHidden] = useState(true);
+  useEffect(() => { try { setBannerHidden(sessionStorage.getItem(BANNER_KEY) === "1"); } catch { setBannerHidden(false); } }, []);
+  const hideBanner = () => { setBannerHidden(true); try { sessionStorage.setItem(BANNER_KEY, "1"); } catch { /* storage blocked */ } };
 
   return (
     <div className="app-root">
@@ -100,15 +109,16 @@ function Shell({ children }: { children: React.ReactNode }) {
 
         <div className="main">
           <TopBar title={active.label} />
-          <div className="content">
-            {(!s || s.mode === "preview") && (
+          <div className={"content" + (wide ? " wide" : "")}>
+            {(!s || s.mode === "preview") && !bannerHidden && (
               <div className="banner">
                 <TriangleAlert className="ico" style={{ color: "var(--warn)" }} />
                 <div>
                   <b>Preview mode.</b> The desk goes live with Elysium&apos;s Phase 2 upgrade, which adds the HyperCore precompile and
                   ElysiumCoreWriter. Until then, desk, book and burn data are <u>simulated</u> to show how the desk will work. Wallet,
-                  network and balances are real. <Link href="/docs#roadmap">See roadmap</Link>
+                  network and balances are real. Terminal orders are paper trades. <Link href="/docs#roadmap">See roadmap</Link>
                 </div>
+                <button className="banner-x" aria-label="Dismiss" onClick={hideBanner}><X className="ico ico-sm" /></button>
               </div>
             )}
             {children}
@@ -117,7 +127,7 @@ function Shell({ children }: { children: React.ReactNode }) {
       </div>
 
       <BurnToaster />
-      <nav className="tabbar" aria-label="App mobile">
+      <nav className="tabbar" aria-label="App mobile" style={{ gridTemplateColumns: `repeat(${NAV.length}, 1fr)` }}>
         {NAV.map(({ href, short, Icon }) => (
           <Link key={href} href={href} className={active.href === href ? "active" : ""}><Icon className="ico" />{short}</Link>
         ))}
@@ -129,7 +139,9 @@ function Shell({ children }: { children: React.ReactNode }) {
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <WalletProvider>
-      <Shell>{children}</Shell>
+      <ChatProvider>
+        <Shell>{children}</Shell>
+      </ChatProvider>
     </WalletProvider>
   );
 }

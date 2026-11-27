@@ -9,6 +9,8 @@ import "@/styles/landing.css";
 import "@/styles/app.css";
 import "@/styles/docs.css";
 import "@/styles/experience.css";
+import "@/styles/terminal.css";
+import "@/styles/chat.css";
 
 // Config is read from process.env at request time, so .env edits apply after a restart (no rebuild).
 export const dynamic = "force-dynamic";
