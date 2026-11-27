@@ -18,7 +18,7 @@ const KEYS: Key[] = [
   { p: 0.1, cam: [0.8, 1.0, 13.8], look: [0, 2.1, 0], gy: 0, morph: 0 },
   { p: 0.3, cam: [2.2, -5.0, 12.5], look: [0, -6.2, 0], gy: -6.2, morph: 1 },
   { p: 0.5, cam: [-4.4, -6.6, 11.2], look: [0, -6.2, 0], gy: -6.2, morph: 1 },
-  { p: 0.7, cam: [0.3, -8.4, 15.0], look: [0, -5.6, 0], gy: -6.6, morph: 2 },
+  { p: 0.7, cam: [0.3, -3.2, 15.5], look: [0, -6.9, 0], gy: -6.6, morph: 2 },   // above the flame: horizon line stays clear of it
   { p: 0.9, cam: [0, -7.4, 15.8], look: [0, -7.7, 0], gy: -5.6, morph: 3 },
   { p: 1.0, cam: [0, -7.4, 16.4], look: [0, -7.7, 0], gy: -5.6, morph: 3 },
 ];
@@ -232,31 +232,43 @@ ${FLEX}
 uniform float uTime; uniform float uMorph; uniform float uSize; uniform float uPR; uniform float uFocus; uniform float uAperture;
 uniform vec2 uMouse; uniform float uHover; uniform float uAspect;
 attribute vec3 aFin; attribute vec3 aBook; attribute vec3 aBurn; attribute vec3 aMark; attribute vec4 aRand; attribute float aWake;
-varying float vAlpha; varying float vMix; varying float vHeat; varying float vBlur; varying float vGlint; varying float vFlameH;
-vec3 flamePos(vec4 r, float t, out float heat){
-  float tongue = floor(r.w * 5.0);                       // 0..4, 2 = central tongue
-  float side = tongue - 2.0;
-  float central = 1.0 - min(abs(side), 1.0);
-  float hmax = mix(4.0, 5.5, central) - abs(side) * 0.35;
-  float h = fract(r.y + t * (0.18 + r.x * 0.14));        // 0 = base .. 1 = tip, rising
-  // wide rounded base (not a point), fullest just above it, tapering to the tips
-  float prof = (0.5 + 0.5 * sin(3.14159 * min(h * 1.8 + 0.18, 1.0))) * pow(1.0 - h, 0.5);
-  float width = mix(1.05, 1.6, central) * prof;
+varying float vAlpha; varying float vMix; varying float vHeat; varying float vBlur; varying float vGlint; varying float vFlameH; varying float vBlue;
+float fhash(vec3 p){ p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+float fnoise(vec3 x){
+  vec3 i = floor(x), f = fract(x);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(mix(fhash(i), fhash(i + vec3(1,0,0)), f.x), mix(fhash(i + vec3(0,1,0)), fhash(i + vec3(1,1,0)), f.x), f.y),
+             mix(mix(fhash(i + vec3(0,0,1)), fhash(i + vec3(1,0,1)), f.x), mix(fhash(i + vec3(0,1,1)), fhash(i + vec3(1,1,1)), f.x), f.y), f.z);
+}
+// Particle flame. h = life (0 = born at the base, 1 = dies at a tip). Noise fields scroll upward over time,
+// so every bulge and tongue travels up the flame like real fire instead of the whole shape swaying.
+// Iconic flame: semicircular bulb at the bottom (h < 0.3), smooth taper to a single pointed tip
+// that curves slightly and sways gently. Particles fill the silhouette evenly.
+float gFlameA = 1.0;
+vec3 flamePos(vec4 r, float t, out float heat, out float blue){
+  float h = fract(r.y + t * 0.08);                         // slow upward drift keeps it alive
+  const float B = 0.3;                                     // bulb height fraction
+  float w = h < B ? sqrt(max(0.0, 1.0 - pow((B - h) / B, 2.0)))
+                  : pow(cos((h - B) / (1.0 - B) * 1.5707963), 1.25);
   float ang = r.z * 6.2831853;
-  float rad = sqrt(fract(r.x * 7.13 + r.z * 3.1));      // 0 = core .. 1 = outer edge
-  float rr = width * rad;
-  vec3 p = vec3(cos(ang) * rr, h * hmax, sin(ang) * rr * 0.75);
-  p.y += rad * rad * 0.55 * (1.0 - smoothstep(0.0, 0.28, h));
-  p.x += side * 0.55 * pow(h, 1.2);
-  float tt = t * 2.6;
-  p.x += (sin(tt + h * 6.0 + tongue * 1.9) * 0.22 + sin(tt * 2.3 + h * 13.0 + r.y * 7.0) * 0.07) * h;
-  p.z += cos(tt * 0.9 + h * 5.0 + tongue) * 0.14 * h;
-  p *= 1.45;
-  p.y -= 3.6;
-  float ember = step(0.94, r.x);
-  p.y += ember * h * 2.4;
-  p.x += ember * sin(t * 1.4 + r.y * 30.0) * h * 1.6;
-  heat = clamp(0.16 + h * 0.8 + rad * 0.34 - central * 0.05 + ember * 0.4, 0.0, 1.0);
+  float rad = sqrt(fract(r.x * 7.13 + r.z * 3.1));        // uniform fill of each cross-section
+  // centre line: tip leans and sways a little
+  float sway = sin(t * 1.3) * 0.18 + (fnoise(vec3(0.0, h * 2.0 - t * 1.2, 3.0)) - 0.5) * 0.35;
+  float cx = (0.35 + sway) * pow(h, 2.2);
+  float R = 1.75 * w;
+  gFlameA = clamp(w * w, 0.08, 1.0) * 0.72;                // even visual density: brightness follows cross-section area
+  // full round volume (not a flat slab) + small vertical jitter so no layer bunches up
+  vec3 p = vec3(cx + cos(ang) * R * rad, h * 6.0 + (fract(r.x * 13.7 + r.w * 5.1) - 0.5) * 0.25, sin(ang) * R * rad);
+  // sparks above the tip
+  float ember = step(0.97, fract(r.w * 5.3 + r.x));
+  float eh = fract(r.y * 1.7 + t * 0.12);
+  vec3 ep = vec3(0.35 + (fnoise(vec3(r.x * 9.0, eh * 2.0 - t * 0.5, 1.0)) - 0.5) * 2.0 * eh, 6.2 + eh * 2.5, (r.z - 0.5) * 0.8);
+  p = mix(p, ep, ember);
+  p.y -= 3.3;
+  // colour: hot core (low, centre) -> cooler edges and tip
+  // heat mostly by height (fade only at the tip), slightly cooler at the outer edge
+  heat = clamp(0.06 + h * 0.84 + rad * 0.1 + ember * 0.3, 0.0, 1.0);
+  blue = 0.0;
   return p;
 }
 vec3 flow(vec3 p, float t){
@@ -271,8 +283,8 @@ void main(){
   float t = clamp((local - aRand.x * 0.4) / 0.6, 0.0, 1.0);
   t = t * t * (3.0 - 2.0 * t);
   vec3 fin = flexFin(aFin, uTime, aWake);
-  float fh;
-  vec3 flame = flamePos(aRand, uTime, fh);
+  float fh, fblue;
+  vec3 flame = flamePos(aRand, uTime, fh, fblue);
   vec3 from = seg < 0.5 ? fin : (seg < 1.5 ? aBook : flame);
   vec3 to   = seg < 0.5 ? aBook : (seg < 1.5 ? flame : aMark);
   vec3 p = mix(from, to, t);
@@ -283,6 +295,7 @@ void main(){
   float burnW = clamp(1.0 - abs(m - 2.0) * 1.4, 0.0, 1.0);
   vHeat = burnW;
   vFlameH = fh;
+  vBlue = fblue * burnW;
 
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
   // hover split: particles near the cursor (in screen space) are pushed outward, slightly randomised
@@ -302,14 +315,14 @@ void main(){
   float coc = clamp(abs(dist - uFocus) * uAperture, 0.0, 1.0);
   float glint = step(0.972, aRand.w);
   float size = uSize * uPR * (0.45 + aRand.y * 0.9) / max(dist, 0.5);
-  gl_PointSize = size * (1.0 + coc * 3.2) * (1.0 + glint * 1.4) * (1.0 + push * 0.12) * mix(1.0, 1.0 - fh * 0.3, burnW);
-  float flameFade = mix(1.0, (1.0 - smoothstep(0.62, 1.0, fh)) * mix(0.62, 1.1, smoothstep(0.1, 0.4, fh)), burnW);
+  gl_PointSize = size * (1.0 + coc * 3.2) * (1.0 + glint * 1.4) * (1.0 + push * 0.12) * mix(1.0, 1.15 - fh * 0.55, burnW);   // particles shrink as they rise
+  float flameFade = mix(1.0, (1.0 - smoothstep(0.85, 1.0, fh)) * gFlameA * 1.15, burnW);
   vAlpha = mix(1.0, uWake, aWake * (1.0 - step(0.5, m))) * (0.24 + 0.34 * aRand.z) * (1.0 - coc * 0.7) * flameFade * (1.0 + glint * 0.35);
   vBlur = coc; vMix = aRand.x; vGlint = glint;
 }`;
 const PART_FRAG = /* glsl */ `
 uniform vec3 uColA; uniform vec3 uColB; uniform vec3 uColWarm;
-varying float vAlpha; varying float vMix; varying float vHeat; varying float vBlur; varying float vGlint; varying float vFlameH;
+varying float vAlpha; varying float vMix; varying float vHeat; varying float vBlur; varying float vGlint; varying float vFlameH; varying float vBlue;
 void main(){
   vec2 c = gl_PointCoord - 0.5;
   float d = length(c);
@@ -321,10 +334,12 @@ void main(){
   a += vGlint * (smoothstep(0.06, 0.0, abs(c.x)) + smoothstep(0.06, 0.0, abs(c.y))) * smoothstep(0.5, 0.0, d) * 0.35;
   vec3 col = mix(uColA, uColB, vMix * 0.7 + vGlint * 0.3);
   // fire palette by height in the flame: white-hot base -> amber -> orange -> red tips
-  vec3 fire = mix(vec3(1.0, 0.98, 0.9), vec3(1.0, 0.8, 0.38), smoothstep(0.05, 0.3, vFlameH));
-  fire = mix(fire, vec3(1.0, 0.5, 0.12), smoothstep(0.28, 0.58, vFlameH));
-  fire = mix(fire, vec3(0.88, 0.2, 0.05), smoothstep(0.55, 0.9, vFlameH));
-  fire = mix(fire, vec3(0.45, 0.08, 0.04), smoothstep(0.88, 1.0, vFlameH));
+  // white-hot core -> yellow -> orange -> red -> ember-dark tips, with a thin blue root
+  vec3 fire = mix(vec3(1.0, 0.93, 0.75), vec3(1.0, 0.72, 0.28), smoothstep(0.04, 0.25, vFlameH));
+  fire = mix(fire, vec3(1.0, 0.45, 0.08), smoothstep(0.22, 0.5, vFlameH));
+  fire = mix(fire, vec3(0.9, 0.2, 0.04), smoothstep(0.48, 0.76, vFlameH));
+  fire = mix(fire, vec3(0.45, 0.07, 0.03), smoothstep(0.76, 1.0, vFlameH));
+  fire = mix(fire, vec3(0.35, 0.65, 1.0), clamp(vBlue, 0.0, 1.0) * 0.85);
   col = mix(col, fire, vHeat);
   gl_FragColor = vec4(col, a * vAlpha);
 }`;
@@ -653,10 +668,8 @@ export class OceanScene {
     v.y += v.length() * this.pointerS.y * 0.05;
     this.camera.position.copy(k.look).add(v);
     this.camera.position.y += Math.sin(t * 0.6) * 0.05;
-    // the swell reaches ~1.2 units: keep the camera fully above or fully below it, never inside.
+    // continuous dive: the camera passes through the swell with the scroll (no jump)
     this.rawCamY = this.camera.position.y;
-    const BAND = 1.5;
-    if (Math.abs(this.rawCamY) < BAND) this.camera.position.y = this.rawCamY >= 0 ? BAND : -BAND;
     this.lookCur.copy(k.look);   // camera aim locked to the same keyframe as the shape (no extra lag)
     this.camera.lookAt(this.lookCur);
 
