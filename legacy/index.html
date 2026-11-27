@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mako Desk · Read the book. Make the market. Burn the profit.</title>
+  <meta name="description" content="$MAKO is the first memecoin with its own on-chain trading desk. Native to Elysium, it reads Hyperliquid order books, makes markets on HyperCore, and burns the profit." />
+  <meta name="theme-color" content="#010608" />
+  <meta property="og:title" content="Mako Desk · The memecoin that makes markets" />
+  <meta property="og:description" content="Read the book. Make the market. Burn the profit. Native to Elysium." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://makodesk.xyz" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@makodesk" />
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/landing.css" />
+</head>
+<body>
+<script src="assets/js/icons.js"></script>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a class="brand" href="index.html" aria-label="Mako Desk home"><img src="assets/img/logo.svg" alt="" />Mako Desk</a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#how">How it works</a>
+      <a href="#token">Token</a>
+      <a href="#roadmap">Roadmap</a>
+      <a href="docs.html">Docs</a>
+    </nav>
+    <div class="nav-right">
+      <a class="btn btn-ghost btn-sm hide-sm" href="https://x.com/makodesk" target="_blank" rel="noopener" aria-label="Mako Desk on X"><svg class="ico ico-sm"><use href="#i-x-logo"/></svg></a>
+      <a class="btn btn-primary btn-sm" href="app.html">Launch app</a>
+      <button class="nav-burger" aria-label="Menu" aria-expanded="false"><svg class="ico"><use href="#i-menu"/></svg></button>
+    </div>
+  </div>
+</header>
+<div class="mobile-menu">
+  <a href="#how">How it works</a><a href="#token">Token</a><a href="#roadmap">Roadmap</a><a href="docs.html">Docs</a><a href="https://x.com/makodesk" target="_blank" rel="noopener">X / @makodesk</a>
+</div>
+
+<main>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container hero-grid">
+      <div>
+        <h1 class="mega">
+          <span>Read the book.</span>
+          <span>Make the market.</span>
+          <span class="hl">Burn the profit.</span>
+        </h1>
+        <p class="lede">$MAKO is the first memecoin with its own trading desk. It runs on Elysium, makes markets on Hyperliquid, and burns every dollar it earns.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary btn-lg" href="app.html">Launch app</a>
+          <a class="btn btn-outline btn-lg" href="docs.html">Read the docs</a>
+        </div>
+      </div>
+      <div class="fin-stage" aria-hidden="true">
+        <canvas id="finCanvas"></canvas>
+        <span class="fin-tag a" id="finTagA">$MAKO</span>
+        <span class="fin-tag b" id="finTagB">mood: cruising</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- TICKER BAND -->
+  <div class="band">
+    <div class="band-label">Live desk.<br/>Every block.</div>
+    <div class="band-track-wrap"><div class="band-track" id="band"></div></div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <section class="sec" id="how">
+    <div class="container">
+      <div class="sec-head reveal">
+        <h2 class="h2">A meme with a balance sheet.<span class="sub">Four steps. All on-chain.</span></h2>
+      </div>
+      <div class="steps4 reveal">
+        <div>
+          <div class="ic"><svg class="ico"><use href="#i-activity"/></svg></div>
+          <span class="n">01 / SENSE</span>
+          <h3>Read the book</h3>
+          <p>The desk reads Hyperliquid order books, funding and liquidations directly through Elysium's precompile. No oracle needed.</p>
+        </div>
+        <div>
+          <div class="ic"><svg class="ico"><use href="#i-arrow-left-right"/></svg></div>
+          <span class="n">02 / QUOTE</span>
+          <h3>Make the market</h3>
+          <p>It places and cancels orders on HyperCore in about 100 ms. The trading agent can trade, and can never withdraw.</p>
+        </div>
+        <div>
+          <div class="ic"><svg class="ico"><use href="#i-coins"/></svg></div>
+          <span class="n">03 / CAPTURE</span>
+          <h3>Earn the spread</h3>
+          <p>Every fill captures a small edge. Position caps and a kill-switch are enforced by the contract itself.</p>
+        </div>
+        <div>
+          <div class="ic"><svg class="ico"><use href="#i-flame"/></svg></div>
+          <span class="n">04 / BURN</span>
+          <h3>Burn the profit</h3>
+          <p>Realized profit buys $MAKO on the open market and burns it. Supply shrinks every time the desk wins.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WIDGET -->
+  <section class="sec" id="desk" style="padding-top:0">
+    <div class="container">
+      <div class="sec-head reveal">
+        <h2 class="h2">Two ways to watch.<span class="sub">The book, or the shark.</span></h2>
+      </div>
+      <div class="widget reveal">
+        <div class="widget-bar">
+          <div class="tabs" id="wTabs"><button class="on" data-t="book">Order book</button><button data-t="mood">Mood</button></div>
+          <span class="pill warn live" title="Simulated until the HyperCore precompile ships"><span class="dot"></span>Preview data</span>
+        </div>
+
+        <div class="widget-body" id="wBook">
+          <div class="w-left">
+            <span class="w-cat">HyperCore · Perpetual</span>
+            <div class="w-title">Where is the desk quoting HYPE right now?</div>
+            <div class="w-price"><span id="wMid">—</span><small id="wChg" class="up">—</small></div>
+            <div class="quotes">
+              <div class="q bid"><small>Desk bid</small><b id="wBid">—</b></div>
+              <div class="q ask"><small>Desk ask</small><b id="wAsk">—</b></div>
+              <div class="q neu"><small>Spread</small><b id="wSpr">—</b></div>
+              <div class="q neu"><small>Fills · session</small><b id="wFills">—</b></div>
+            </div>
+            <div class="w-foot"><span>Read every ~70 ms · 0 oracles</span><span id="wLat">— ms</span></div>
+          </div>
+          <div class="w-right"><canvas id="wChart"></canvas></div>
+        </div>
+
+        <div class="widget-body" id="wMood" hidden>
+          <div class="w-left">
+            <span class="w-cat">Mood Engine</span>
+            <div class="w-title">Set by HyperCore funding and liquidations.</div>
+            <div class="moodlist" id="moodList"></div>
+            <div class="w-foot"><span>Funding 1h</span><span id="wFund">—</span></div>
+          </div>
+          <div class="w-right">
+            <div class="mood-big">
+              <div>
+                <svg class="fin" id="moodFin" style="color:#93d9ee"><use href="#i-fin"/></svg>
+                <h3 id="moodName">Cruising</h3>
+                <p id="moodDesc">—</p>
+                <div class="meter"><i id="moodDot" style="left:50%"></i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SPLIT: integrate -->
+  <section class="sec" style="padding-top:0">
+    <div class="container split">
+      <div class="reveal">
+        <h2 class="h2">Plug into the desk.<span class="sub">Read it from any contract.</span></h2>
+        <p class="lead">Mood, PnL, inventory and burns are public on-chain state. Build bots, dashboards or your own memes on top of the shark.</p>
+        <a class="btn btn-outline" href="docs.html#integration">Read the integration docs <svg class="ico ico-sm"><use href="#i-arrow-right"/></svg></a>
+      </div>
+      <div class="codecard reveal">
+        <div class="step-h"><span class="n">1</span>Read the desk state.</div>
+        <div class="codetabs" id="codeTabs"><button class="on" data-c="sol">Solidity</button><button data-c="viem">viem</button><button data-c="cast">cast</button></div>
+        <div class="codebox">
+          <button class="btn btn-sm cp" id="codeCopy"><svg class="ico ico-sm"><use href="#i-copy"/></svg>Copy</button>
+          <pre id="codePre"></pre>
+        </div>
+        <div class="step-h"><span class="n">2</span>React to the mood.</div>
+        <div class="codenote">Subscribe to <code>MoodChanged</code> and <code>Burned</code> events. Mood updates at HyperCore block speed, every ~70 ms.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HEAVY CYAN: TOKEN -->
+  <section class="sec cyan-block" id="token">
+    <div class="container">
+      <h2 class="h2 reveal">Simple. Fair. Built to shrink.<span class="sub">Fixed supply. No mint. No tax. No team bag.</span></h2>
+      <div class="stats4 reveal">
+        <div><b>1B</b><span>Fixed supply</span><small>No mint function, ever</small></div>
+        <div><b>0%</b><span>Buy / sell tax</span><small>The desk earns from markets, not holders</small></div>
+        <div><b>0%</b><span>Team allocation</span><small>Team buys at launch like everyone</small></div>
+        <div><b>80%</b><span>Of profit burned</span><small>Every epoch, from realized PnL</small></div>
+      </div>
+      <div class="allocbar reveal">
+        <div class="a1">70% <span>&nbsp;Fair-launch liquidity</span></div>
+        <div class="a2">20% <span>&nbsp;Desk</span></div>
+        <div class="a3">10%</div>
+      </div>
+      <div class="alloclegend">
+        <span><b>70% Fair-launch liquidity</b>: paired with HYPE, LP locked</span>
+        <span><b>20% Desk treasury</b>: held by contract</span>
+        <span><b>10% Community</b>: 12-mo unlock</span>
+      </div>
+      <div class="ca-row">
+        <div class="ca-chip"><span id="caText">CA: published at launch on @makodesk</span><button data-copy="" id="caCopy"><svg class="ico ico-sm"><use href="#i-copy"/></svg>Copy</button></div>
+        <a class="btn btn-dark btn-lg" href="app.html#swap">Buy $MAKO <svg class="ico ico-sm"><use href="#i-arrow-right"/></svg></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRUST -->
+  <section class="sec">
+    <div class="container">
+      <h2 class="h2 reveal">Trust the code.<span class="sub">Not the team.</span></h2>
+      <div class="trust3 reveal">
+        <div><svg class="ico"><use href="#i-shield-check"/></svg><h3>Trade-only agent</h3><p>The desk's HyperCore agent can place and cancel orders. It has no withdraw path. A leaked key can't move funds.</p></div>
+        <div><svg class="ico"><use href="#i-lock"/></svg><h3>Hard limits on-chain</h3><p>Max position, max daily loss and max drawdown are enforced in the contract. Breach one and quoting stops.</p></div>
+        <div><svg class="ico"><use href="#i-eye"/></svg><h3>Everything public</h3><p>Every fill, every burn and every parameter change is an event. Changes go through a 48-hour timelock.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROADMAP -->
+  <section class="sec" id="roadmap" style="padding-top:0">
+    <div class="container">
+      <div class="sec-head reveal">
+        <h2 class="h2">Shipped with Elysium.<span class="sub">Each phase unlocks with the chain.</span></h2>
+      </div>
+      <div class="road reveal">
+        <div class="now">
+          <div class="ph"><span>PHASE 01</span><span class="pill mint live"><span class="dot"></span>Now</span></div>
+          <h3>Surface</h3><div class="dep">Elysium mainnet · live</div>
+          <ul><li><svg class="ico"><use href="#i-check"/></svg>Fair launch, LP locked</li><li><svg class="ico"><use href="#i-check"/></svg>Explorer verification</li><li><svg class="ico"><use href="#i-check"/></svg>App in preview mode</li></ul>
+        </div>
+        <div>
+          <div class="ph"><span>PHASE 02</span></div>
+          <h3>Sense</h3><div class="dep">Market-data precompile</div>
+          <ul><li><svg class="ico"><use href="#i-arrow-right"/></svg>Live Mood Engine</li><li><svg class="ico"><use href="#i-arrow-right"/></svg>Wick detector</li><li><svg class="ico"><use href="#i-arrow-right"/></svg>Real-time dashboard</li></ul>
+        </div>
+        <div>
+          <div class="ph"><span>PHASE 03</span></div>
+          <h3>Strike</h3><div class="dep">ElysiumCoreWriter stable</div>
+          <ul><li><svg class="ico"><use href="#i-arrow-right"/></svg>Desk quoting under caps</li><li><svg class="ico"><use href="#i-arrow-right"/></svg>MakoDesk audit</li><li><svg class="ico"><use href="#i-arrow-right"/></svg>Buyback and burn loop</li></ul>
+        </div>
+        <div>
+          <div class="ph"><span>PHASE 04</span></div>
+          <h3>Apex</h3><div class="dep">Public track record</div>
+          <ul><li><svg class="ico"><use href="#i-arrow-right"/></svg>HyperCore spot listing</li><li><svg class="ico"><use href="#i-arrow-right"/></svg>Higher caps</li><li><svg class="ico"><use href="#i-arrow-right"/></svg>Multi-market desk</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="sec" id="faq" style="padding-top:0">
+    <div class="container faq-grid">
+      <h2 class="h2 reveal">Questions.<span class="sub">Answered.</span></h2>
+      <div class="faq reveal">
+        <details><summary>Is the desk trading right now?<svg class="ico"><use href="#i-plus"/></svg></summary><p>Not yet. The live desk needs Elysium's Phase 2 upgrade, which adds the HyperCore precompile and ElysiumCoreWriter. Until then the app shows a clearly labelled preview. The token and liquidity are live from launch.</p></details>
+        <details><summary>Why Elysium?<svg class="ico"><use href="#i-plus"/></svg></summary><p>Elysium is an EVM L2 for Hyperliquid with 100 ms blocks, HYPE as gas and, from Phase 2, native read and write access to HyperCore order books. A contract that makes markets on Hyperliquid isn't practical on any other chain.</p></details>
+        <details><summary>Can the team take the treasury?<svg class="ico"><use href="#i-plus"/></svg></summary><p>No. The trading agent can't withdraw, the 20% desk allocation is held by the contract, and parameters only change through a public 48-hour timelock.</p></details>
+        <details><summary>What if the desk loses money?<svg class="ico"><use href="#i-plus"/></svg></summary><p>Losses are capped per day and overall. When a limit is hit, quoting pauses automatically and the event is public. Burns only come from realized profit, never from principal.</p></details>
+        <details><summary>How do I buy $MAKO?<svg class="ico"><use href="#i-plus"/></svg></summary><p>Bridge HYPE to Elysium, open the app, connect your wallet and swap. The official contract address is posted only on makodesk.xyz and @makodesk.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMMUNITY -->
+  <section class="sec" style="padding-top:0">
+    <div class="container">
+      <h2 class="mega-2 reveal">Join the desk.</h2>
+      <div class="comm reveal">
+        <a href="https://x.com/makodesk" target="_blank" rel="noopener">
+          <svg class="brandico"><use href="#i-x-logo"/></svg>
+          <svg class="ico arr"><use href="#i-arrow-up-right"/></svg>
+          <h3>X</h3><p>Follow @makodesk for burn reports, desk updates and the official contract address.</p>
+        </a>
+        <a href="https://t.me/makodesk" target="_blank" rel="noopener">
+          <svg class="ico brandico" style="stroke-width:1.6"><use href="#i-send"/></svg>
+          <svg class="ico arr"><use href="#i-arrow-up-right"/></svg>
+          <h3>Telegram</h3><p>Talk to the team and other holders, and see desk events as they happen.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top">
+      <a class="brand" href="index.html"><img src="assets/img/logo.svg" alt="" />Mako Desk</a>
+      <nav class="footer-links">
+        <a href="app.html">App</a><a href="docs.html">Docs</a><a href="docs.html#contracts">Contracts</a><a href="docs.html#security">Security</a><a href="docs.html#brand">Brand kit</a><a href="docs.html#legal">Risk disclosure</a>
+      </nav>
+    </div>
+    <p class="legal">$MAKO is a memecoin with no intrinsic value and no expectation of financial return. The desk is an experimental, capped on-chain trading strategy that can lose money. Prices shown in preview mode are simulated. Nothing on this site is investment advice. Elysium, Kinetiq, Hyperliquid and HyperCore are independent third parties with no affiliation to Mako Desk.</p>
+    <p class="copy">© 2026 Mako Desk</p>
+  </div>
+</footer>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/common.js"></script>
+<script src="assets/js/sim.js"></script>
+<script src="assets/js/landing.js"></script>
+</body>
+</html>

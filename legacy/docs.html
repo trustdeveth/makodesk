@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mako Desk Docs</title>
+  <meta name="description" content="Documentation for Mako Desk and $MAKO: quickstart, token, desk architecture, Mood Engine, integration, contracts, security and brand kit." />
+  <meta name="theme-color" content="#010608" />
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/docs.css" />
+</head>
+<body>
+<script src="assets/js/icons.js"></script>
+
+<header class="nav">
+  <div class="container nav-inner" style="max-width:1360px">
+    <a class="brand" href="index.html"><img src="assets/img/logo.svg" alt="" />Mako Desk <span class="tick">Docs</span></a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="index.html">Home</a>
+      <a href="app.html">App</a>
+      <a href="docs.html" class="active">Docs</a>
+    </nav>
+    <div class="nav-right">
+      <a class="btn btn-ghost btn-sm hide-sm" href="https://x.com/makodesk" target="_blank" rel="noopener">@makodesk</a>
+      <a class="btn btn-primary btn-sm" href="app.html">Launch App</a>
+      <button class="nav-burger" aria-label="Menu" aria-expanded="false"><svg class="ico"><use href="#i-menu"/></svg></button>
+    </div>
+  </div>
+</header>
+<div class="mobile-menu"><a href="index.html">Home</a><a href="app.html">App</a><a href="docs.html">Docs</a><a href="https://x.com/makodesk" target="_blank" rel="noopener">X / @makodesk</a></div>
+
+<div class="docs">
+  <aside class="dside" id="dside">
+    <button class="btn btn-sm dtoggle" id="dtoggle"><svg class="ico ico-sm"><use href="#i-panel-left"/></svg>Contents</button>
+    <div class="dsearch">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="dq" type="search" placeholder="Search docs" aria-label="Search docs" />
+      <kbd>/</kbd>
+    </div>
+    <div class="dgroups">
+      <div class="dgroup"><h6>Start</h6>
+        <a href="#intro">Introduction</a>
+        <a href="#identity">Project identity</a>
+        <a href="#quickstart">Quickstart</a>
+        <a href="#bridge">Bridging HYPE</a>
+      </div>
+      <div class="dgroup"><h6>Protocol</h6>
+        <a href="#token">Token</a>
+        <a href="#desk">The Desk</a>
+        <a href="#risk">Risk controls</a>
+        <a href="#mood">Mood Engine</a>
+        <a href="#burns">Buyback &amp; burn</a>
+      </div>
+      <div class="dgroup"><h6>Developers</h6>
+        <a href="#elysium">Elysium primer</a>
+        <a href="#integration">Integration</a>
+        <a href="#contracts">Contracts</a>
+        <a href="#app-config">App configuration</a>
+      </div>
+      <div class="dgroup"><h6>Project</h6>
+        <a href="#roadmap">Roadmap</a>
+        <a href="#security">Security</a>
+        <a href="#brand">Brand kit</a>
+        <a href="#faq">FAQ</a>
+        <a href="#legal">Legal</a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="dmain" id="dmain">
+
+    <section id="intro">
+      <span class="eyebrow">Documentation</span>
+      <h1>Mako Desk</h1>
+      <p class="lead">$MAKO is a memecoin with its own on-chain trading desk. It runs natively on Elysium, reads Hyperliquid's order books through a precompile, makes markets on HyperCore, and burns its profits.</p>
+      <p>Most memecoins depend entirely on attention. $MAKO adds a working mechanism underneath. A treasury contract, <code>MakoDesk</code>, quotes two-sided markets on HyperCore under hard risk limits. Realized profit is used to buy $MAKO on the open market and send it to the burn address. Everything happens in contracts and can be checked on the explorer.</p>
+      <div class="cards2">
+        <a href="#quickstart"><b>Quickstart<svg class="ico ico-sm" style="display:inline;vertical-align:-2px;margin-left:4px"><use href="#i-arrow-right"/></svg></b><span>Add Elysium, bridge HYPE and buy $MAKO in a few minutes.</span></a>
+        <a href="#desk"><b>How the desk works<svg class="ico ico-sm" style="display:inline;vertical-align:-2px;margin-left:4px"><use href="#i-arrow-right"/></svg></b><span>Architecture, the quoting loop and custody model.</span></a>
+        <a href="#integration"><b>Integrate<svg class="ico ico-sm" style="display:inline;vertical-align:-2px;margin-left:4px"><use href="#i-arrow-right"/></svg></b><span>Read desk state and mood from your own contracts.</span></a>
+        <a href="#security"><b>Security<svg class="ico ico-sm" style="display:inline;vertical-align:-2px;margin-left:4px"><use href="#i-arrow-right"/></svg></b><span>What can and can't happen to the treasury.</span></a>
+      </div>
+      <div class="callout warn"><span class="ic"><svg class="ico ico-sm"><use href="#i-triangle-alert"/></svg></span><div><b>Current status: Phase 1 (Surface).</b> The token and liquidity are live first. The desk switches on with Elysium's Phase 2 ArbOS upgrade, which adds the HyperCore market-data precompile and ElysiumCoreWriter. Until then the app runs in clearly labelled preview mode.</div></div>
+    </section>
+
+    <section id="identity">
+      <h2>Project identity</h2>
+      <p>These are the only official names and channels. Anything else is not us.</p>
+      <div class="tw"><table class="dtable">
+        <tr><th>Field</th><th>Value</th><th>Notes</th></tr>
+        <tr><td>Project name</td><td><strong>Mako Desk</strong></td><td>The mako is the fastest shark, matching Elysium's 100 ms blocks. "Mako" also reads as <em>MArKet maker</em>.</td></tr>
+        <tr><td>Token name</td><td><strong>Mako</strong></td><td>ERC-20 on Elysium, 18 decimals</td></tr>
+        <tr><td>Ticker</td><td class="mono">$MAKO</td><td>Some unrelated Solana tokens use the same ticker. Always verify the Elysium contract address.</td></tr>
+        <tr><td>Tagline</td><td>The memecoin that makes markets.</td><td></td></tr>
+        <tr><td>Domain</td><td class="mono">makodesk.xyz</td><td>Backup domains: <span class="mono">makodesk.trade</span>, <span class="mono">makodesk.fun</span></td></tr>
+        <tr><td>X (Twitter)</td><td class="mono">@makodesk</td><td>Contract address is posted here and on the website only</td></tr>
+        <tr><td>Telegram</td><td class="mono">t.me/makodesk</td><td>Admins never DM first</td></tr>
+      </table></div>
+    </section>
+
+    <section id="quickstart">
+      <h2>Quickstart</h2>
+      <p>You need an EVM wallet (Rabby, MetaMask, OKX Wallet) and some HYPE.</p>
+      <ol>
+        <li><strong>Open the app</strong> at <a class="lk" href="app.html">makodesk.xyz/app</a> and click <em>Connect wallet</em>.</li>
+        <li><strong>Add Elysium.</strong> The app will prompt you to add the network, or you can add it manually using the values below.</li>
+        <li><strong>Bridge HYPE</strong> from HyperEVM to Elysium (see <a class="lk" href="#bridge">Bridging</a>). HYPE is the gas token, so keep a small amount for fees.</li>
+        <li><strong>Swap</strong> HYPE for $MAKO on the <em>Swap</em> tab, then use <em>Add token</em> so your wallet shows your balance.</li>
+      </ol>
+      <div class="tw"><table class="dtable" id="netTable">
+        <tr><th>Network field</th><th>Value</th></tr>
+        <tr><td>Network name</td><td class="mono">Elysium</td></tr>
+        <tr><td>Chain ID</td><td class="mono" data-cfg="chain.chainId">—</td></tr>
+        <tr><td>Currency symbol</td><td class="mono">HYPE</td></tr>
+        <tr><td>RPC URL</td><td class="mono" data-cfg="chain.rpcUrl">—</td></tr>
+        <tr><td>Explorer</td><td class="mono" data-cfg="chain.explorer">—</td></tr>
+      </table></div>
+      <div class="callout info"><span class="ic"><svg class="ico ico-sm"><use href="#i-info"/></svg></span><div>Always take network details from Kinetiq's official Elysium docs. The app reads them from <code>assets/js/config.js</code>, so there is only one place to update.</div></div>
+    </section>
+
+    <section id="bridge">
+      <h2>Bridging HYPE</h2>
+      <p>Elysium uses native HYPE for gas, bridged 1:1 from HyperEVM, so there's no separate gas token to buy.</p>
+      <ul>
+        <li><strong>Native bridge:</strong> deposits arrive in minutes. Withdrawals back to HyperEVM currently take about 24 hours.</li>
+        <li><strong>Instant routes:</strong> Relay, Enso and Jumper offer fast bridging in both directions for a fee.</li>
+      </ul>
+      <div class="callout warn"><span class="ic"><svg class="ico ico-sm"><use href="#i-triangle-alert"/></svg></span><div>Elysium is a young chain: one sequencer, a whitelisted validator set, and permissionless fraud proofs (BoLD) still on the roadmap. Size your positions with that in mind.</div></div>
+    </section>
+
+    <section id="token">
+      <h2>Token</h2>
+      <p>$MAKO is a plain ERC-20 with a fixed supply and no admin functions. Supply can only go down.</p>
+      <div class="tw"><table class="dtable">
+        <tr><th>Allocation</th><th>Share</th><th>Tokens</th><th>Terms</th></tr>
+        <tr><td>Fair-launch liquidity</td><td class="mono">70%</td><td class="mono">700,000,000</td><td>Paired with HYPE at launch. LP position locked.</td></tr>
+        <tr><td>Desk treasury</td><td class="mono">20%</td><td class="mono">200,000,000</td><td>Held by the <code>MakoDesk</code> contract as inventory for MAKO/HYPE quoting. Never held by a wallet.</td></tr>
+        <tr><td>Community &amp; ecosystem</td><td class="mono">10%</td><td class="mono">100,000,000</td><td>Listings, builder grants, campaigns. 12-month linear unlock, reported publicly.</td></tr>
+        <tr><td>Team</td><td class="mono">0%</td><td class="mono">0</td><td>None. The team buys at launch like everyone else.</td></tr>
+      </table></div>
+      <ul>
+        <li><strong>Total supply:</strong> 1,000,000,000 MAKO. No mint function.</li>
+        <li><strong>Tax:</strong> 0% buy, 0% sell.</li>
+        <li><strong>Ownership:</strong> renounced at deployment. No proxy, no blacklist, no pause.</li>
+        <li><strong>Explorer verification:</strong> token info is verified on the official Elysium explorer (100 KNTQ, burned by the explorer program).</li>
+      </ul>
+    </section>
+
+    <section id="desk">
+      <h2>The Desk</h2>
+      <p><code>MakoDesk</code> is the treasury contract that trades. It runs a simple, auditable market-making loop on HyperCore:</p>
+      <ol>
+        <li><strong>Sense.</strong> It reads the HYPE-PERP order book (full depth), mid price, funding and recent liquidations through Elysium's market-data precompile. Data is at HyperCore block granularity (~70 ms) and about 150–350 ms fresh inside the EVM.</li>
+        <li><strong>Decide.</strong> It computes a fair price, applies inventory skew and a spread set by the current <a class="lk" href="#mood">mood</a>, and checks every <a class="lk" href="#risk">risk limit</a>.</li>
+        <li><strong>Quote.</strong> It places and cancels resting orders on HyperCore through <code>ElysiumCoreWriter</code> in about 100 ms, using a trade-only agent on the desk's own HyperCore sub-account.</li>
+        <li><strong>Settle.</strong> Realized PnL is tallied each epoch. Profit goes to <a class="lk" href="#burns">buyback &amp; burn</a>.</li>
+      </ol>
+      <h3>Who triggers the loop?</h3>
+      <p>Anyone. <code>poke()</code> is permissionless and pays a small HYPE tip to the caller, so quoting doesn't depend on a team-run server. A public keeper is provided as a fallback.</p>
+      <h3>Custody model</h3>
+      <ul>
+        <li>The HyperCore agent can <strong>place and cancel orders only</strong>. It has no transfer or withdraw permission.</li>
+        <li>Desk capital lives in the contract and its dedicated HyperCore sub-account, never in a team wallet.</li>
+        <li>Parameter changes go through a <strong>48-hour timelock</strong> and are announced on @makodesk before they take effect.</li>
+      </ul>
+    </section>
+
+    <section id="risk">
+      <h2>Risk controls</h2>
+      <p>Market making can lose money, so the limits are enforced by the contract itself.</p>
+      <div class="tw"><table class="dtable">
+        <tr><th>Control</th><th>Launch value</th><th>Behaviour</th></tr>
+        <tr><td>Max position</td><td class="mono">2,500 HYPE notional</td><td>Orders that would exceed it are rejected on-chain.</td></tr>
+        <tr><td>Max daily loss</td><td class="mono">$4,000</td><td>When hit, the desk cancels all quotes and pauses until the next UTC day.</td></tr>
+        <tr><td>Max drawdown</td><td class="mono">15% of desk capital</td><td>Triggers the kill-switch. Resuming needs a timelocked call.</td></tr>
+        <tr><td>Inventory skew</td><td class="mono">±40%</td><td>Quotes lean toward reducing inventory past this band.</td></tr>
+        <tr><td>Stale data guard</td><td class="mono">&gt; 750 ms</td><td>If precompile data is stale, the desk cancels and waits.</td></tr>
+        <tr><td>Kill-switch</td><td class="mono">public</td><td>Anyone can trigger it when any limit is provably breached.</td></tr>
+      </table></div>
+      <p>Caps start small and are raised only once the desk has a public track record, always through the timelock.</p>
+    </section>
+
+    <section id="mood">
+      <h2>Mood Engine</h2>
+      <p>Mako's mood is a public on-chain state derived from HyperCore funding and liquidation flow. It does two jobs: it changes how the desk quotes, and it gives the community a live signal to rally around.</p>
+      <div class="tw"><table class="dtable">
+        <tr><th>Mood</th><th>Trigger (1h funding)</th><th>Desk spread</th><th>Burn multiplier</th></tr>
+        <tr><td><span style="display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px;background:#3ee6a8"></span> Feeding Frenzy</td><td class="mono">&lt; −0.40%</td><td class="mono">1.5 bps</td><td class="mono">1.5×</td></tr>
+        <tr><td><span style="display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px;background:#34b7dd"></span> Hunting</td><td class="mono">−0.40% to 0</td><td class="mono">2 bps</td><td class="mono">1.2×</td></tr>
+        <tr><td><span style="display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px;background:#93d9ee"></span> Cruising</td><td class="mono">0 to 0.60%</td><td class="mono">3 bps</td><td class="mono">1.0×</td></tr>
+        <tr><td><span style="display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px;background:#ffc247"></span> Circling</td><td class="mono">0.60% to 1.20%</td><td class="mono">6 bps</td><td class="mono">0.8×</td></tr>
+        <tr><td><span style="display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px;background:#ff5252"></span> Breach</td><td class="mono">&gt; 1.20% or liquidation cascade</td><td class="mono">12 bps</td><td class="mono">2.0× wick bonus</td></tr>
+      </table></div>
+      <h3>Wick detector</h3>
+      <p>If HYPE drops more than a threshold within a few HyperCore blocks while liquidations spike, the desk enters <strong>Breach</strong> and arms a <em>wick bonus</em>. The next settlement burns at 2× the normal share, still funded only from realized profit.</p>
+    </section>
+
+    <section id="burns">
+      <h2>Buyback &amp; burn</h2>
+      <ul>
+        <li>At each epoch, <strong>80%</strong> of realized desk profit buys $MAKO from the official pool and sends it to <code>0x000…dEaD</code>. The other 20% is kept as desk capital.</li>
+        <li>Burns are never funded from principal. A losing epoch burns nothing.</li>
+        <li>Each burn emits <code>Burned(amount, reason, epoch)</code> and appears in the app's Burn log with its transaction.</li>
+      </ul>
+    </section>
+
+    <section id="elysium">
+      <h2>Elysium primer</h2>
+      <p>Elysium is Kinetiq's EVM Layer 2 for the Hyperliquid ecosystem, built on Arbitrum Orbit (Nitro / ArbOS) and settling to HyperEVM. Mainnet went live on November 9, 2026.</p>
+      <div class="tw"><table class="dtable">
+        <tr><th>Property</th><th>Value</th></tr>
+        <tr><td>Block time</td><td>100 ms canonical blocks (~300 ms perceived receipt)</td></tr>
+        <tr><td>Throughput target</td><td>300 Mgas/s</td></tr>
+        <tr><td>Gas token</td><td>Native HYPE, bridged 1:1 from HyperEVM</td></tr>
+        <tr><td>Data availability</td><td>AnyTrust (certificate posted to HyperEVM)</td></tr>
+        <tr><td>Sequencing</td><td>Single sequencer (operated with Conduit), priority-fee ordering</td></tr>
+        <tr><td>Phase 2</td><td>HyperCore market-data precompile + ElysiumCoreWriter (fast trading lane)</td></tr>
+      </table></div>
+    </section>
+
+    <section id="integration">
+      <h2>Integration</h2>
+      <p>Other contracts can read the desk's state, for example to build on the mood signal or show burn stats.</p>
+      <div class="code"><div class="ch"><span>IMakoDesk.sol</span><button data-copycode>Copy</button></div><pre data-lang="sol">// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+
+interface IMakoDesk {
+    enum Mood { Feeding, Hunting, Cruising, Circling, Breach }
+
+    struct DeskState {
+        Mood    mood;
+        int256  fundingE8;       // 1h funding, 1e8 = 1%
+        uint256 midPriceE8;      // HYPE-PERP mid, USD 1e8
+        int256  positionE8;      // signed HYPE notional
+        int256  realizedPnlUsdE6;
+        uint256 totalBurned;     // MAKO, 18 decimals
+        bool    paused;
+        uint64  coreBlock;       // HyperCore block of last read
+    }
+
+    function mood() external view returns (Mood);
+    function state() external view returns (DeskState memory);
+    function poke() external;    // permissionless; tips caller in HYPE
+
+    event Quoted(uint64 indexed coreBlock, uint256 bidE8, uint256 askE8, uint256 sizeE8);
+    event Filled(uint64 indexed coreBlock, bool isBuy, uint256 pxE8, uint256 szE8, int256 edgeUsdE6);
+    event MoodChanged(Mood from, Mood to, int256 fundingE8);
+    event Burned(uint256 amount, bytes32 reason, uint256 indexed epoch);
+    event KillSwitch(address indexed caller, bytes32 reason);
+}</pre></div>
+      <h3>Reading from a frontend</h3>
+      <div class="code"><div class="ch"><span>read-mood.js</span><button data-copycode>Copy</button></div><pre data-lang="js">// viem example
+import { createPublicClient, http } from "viem";
+
+const client = createPublicClient({ transport: http(ELYSIUM_RPC) });
+const MOODS = ["Feeding", "Hunting", "Cruising", "Circling", "Breach"];
+
+const mood = await client.readContract({
+  address: MAKO_DESK,
+  abi: [{ name: "mood", type: "function", stateMutability: "view", inputs: [], outputs: [{ type: "uint8" }] }],
+  functionName: "mood",
+});
+console.log("Mako is", MOODS[mood]);</pre></div>
+      <div class="callout info"><span class="ic"><svg class="ico ico-sm"><use href="#i-info"/></svg></span><div><b>About the precompile ABI.</b> Kinetiq hasn't published the final interfaces for the market-data precompile and ElysiumCoreWriter yet. <code>MakoDesk</code> wraps them behind an internal adapter, so the public interface above stays the same when they ship. Until then, community tools such as Precompilisium serve HyperEVM-style HyperCore reads.</div></div>
+    </section>
+
+    <section id="contracts">
+      <h2>Contracts</h2>
+      <p>Addresses are published here, on makodesk.xyz and on @makodesk at deployment. Treat any address from another source as a scam.</p>
+      <div class="tw"><table class="dtable">
+        <tr><th>Contract</th><th>Address</th><th>Status</th></tr>
+        <tr><td>$MAKO token</td><td class="mono" data-addr="token">—</td><td>Phase 1</td></tr>
+        <tr><td>MakoDesk</td><td class="mono" data-addr="desk">—</td><td>Phase 2–3</td></tr>
+        <tr><td>LP lock</td><td class="mono" data-addr="lp">—</td><td>Phase 1</td></tr>
+        <tr><td>Burn address</td><td class="mono">0x000000000000000000000000000000000000dEaD</td><td>—</td></tr>
+      </table></div>
+    </section>
+
+    <section id="app-config">
+      <h2>App configuration</h2>
+      <p>The website, app and docs all read from one file, <code>assets/js/config.js</code>. To go live:</p>
+      <ol>
+        <li>Fill in <code>chain</code> with the official Elysium chain ID, RPC and explorer.</li>
+        <li>After deployment, set <code>contracts.token</code>, <code>contracts.lp</code> and later <code>contracts.desk</code>.</li>
+        <li>Set <code>links.swap</code>, <code>links.bridge</code> and <code>links.chart</code>.</li>
+        <li>When the desk is live, set <code>previewMode: false</code>. This removes the preview banners and switches the dashboard to on-chain reads.</li>
+      </ol>
+      <div class="code"><div class="ch"><span>assets/js/config.js</span><button data-copycode>Copy</button></div><pre data-lang="js">contracts: {
+  token: "0x…",   // $MAKO
+  desk:  "0x…",   // MakoDesk
+  lp:    "0x…",   // LP lock
+},
+previewMode: false,</pre></div>
+    </section>
+
+    <section id="roadmap">
+      <h2>Roadmap</h2>
+      <p>Each phase starts only once the Elysium feature it depends on is live.</p>
+      <div class="tw"><table class="dtable">
+        <tr><th>Phase</th><th>Depends on</th><th>Delivers</th></tr>
+        <tr><td><strong>1 · Surface</strong> <span class="pill mint" style="height:20px;margin-left:6px">now</span></td><td>Elysium mainnet (live)</td><td>Fair launch, LP lock, explorer verification, preview app, docs</td></tr>
+        <tr><td><strong>2 · Sense</strong></td><td>ArbOS upgrade: market-data precompile</td><td>Live Mood Engine, wick detector, real-time dashboard</td></tr>
+        <tr><td><strong>3 · Strike</strong></td><td>ElysiumCoreWriter stable</td><td>Desk quoting under caps, audit, buyback &amp; burn loop</td></tr>
+        <tr><td><strong>4 · Apex</strong></td><td>Track record</td><td>HyperCore spot listing path, higher caps, multi-market desk</td></tr>
+      </table></div>
+    </section>
+
+    <section id="security">
+      <h2>Security</h2>
+      <ul>
+        <li><strong>Token:</strong> minimal OpenZeppelin ERC-20 with no owner functions, verified source.</li>
+        <li><strong>Desk:</strong> external audit before the desk holds capital. The report will be linked here.</li>
+        <li><strong>Agent keys:</strong> trade-only. A leaked key can't move funds, and losses are bounded by the on-chain caps.</li>
+        <li><strong>Chain risk:</strong> Elysium is new and currently runs one sequencer with whitelisted validators. Outages or reorgs can affect the desk. The stale-data guard cancels quotes when reads lag.</li>
+        <li><strong>Bug bounty:</strong> report issues to <span class="mono">security@makodesk.xyz</span>.</li>
+      </ul>
+    </section>
+
+    <section id="brand">
+      <h2>Brand kit</h2>
+      <p>Use these assets freely for community content. Please don't change the logo's shape or colours.</p>
+      <div class="logo-tiles">
+        <div style="background:#05080d"><img src="assets/img/logo.svg" alt="Mako Desk logo on dark" /></div>
+        <div style="background:#0f1721"><img src="assets/img/logo.svg" alt="Mako Desk logo on surface" /></div>
+        <div style="background:linear-gradient(135deg,#2e6bff,#5ef2c8)"><img src="assets/img/logo.svg" alt="Mako Desk logo on gradient" /></div>
+      </div>
+      <div class="brandgrid">
+        <div class="swatch"><div class="c" style="background:#5ef2c8"></div><div>Mako Mint<small>#5EF2C8</small></div></div>
+        <div class="swatch"><div class="c" style="background:#2e6bff"></div><div>Deep Current<small>#2E6BFF</small></div></div>
+        <div class="swatch"><div class="c" style="background:#05080d;border-bottom:1px solid #1a2533"></div><div>Abyss<small>#05080D</small></div></div>
+        <div class="swatch"><div class="c" style="background:#ff5c7a"></div><div>Breach<small>#FF5C7A</small></div></div>
+        <div class="swatch"><div class="c" style="background:#ffc24b"></div><div>Circling<small>#FFC24B</small></div></div>
+        <div class="swatch"><div class="c" style="background:#e8eef6"></div><div>Foam<small>#E8EEF6</small></div></div>
+      </div>
+      <p><strong>Type:</strong> Space Grotesk for headings, Inter for body text, JetBrains Mono for numbers and code.<br/><strong>Voice:</strong> calm, precise, a little dry. The shark doesn't shout.</p>
+    </section>
+
+    <section id="faq">
+      <h2>FAQ</h2>
+      <h3>Is the desk live?</h3>
+      <p>Not yet. It needs Elysium's Phase 2 upgrade. The app's preview mode shows how it will behave, and every simulated number is labelled as such.</p>
+      <h3>Can the desk lose money?</h3>
+      <p>Yes. Losses are capped per day and in total, and quoting pauses automatically when a limit is hit. Burns only come from realized profit.</p>
+      <h3>Why no tax?</h3>
+      <p>Taxes hurt liquidity and look like a cash grab. The desk is meant to earn from the market, not from holders.</p>
+      <h3>Where is the official contract address?</h3>
+      <p>Only on makodesk.xyz, these docs and @makodesk.</p>
+    </section>
+
+    <section id="legal">
+      <h2>Legal</h2>
+      <p>$MAKO is a memecoin. It has no intrinsic value and carries no promise of profit, dividends or returns. The desk is an experimental, capped trading strategy that can lose money, and its results don't entitle holders to anything. Nothing in these docs is financial, legal or tax advice. Elysium, Kinetiq, Hyperliquid and HyperCore are independent third parties with no affiliation to Mako Desk. Participation may be restricted in your jurisdiction, and you're responsible for following local law.</p>
+      <div class="dpager"><a class="btn" href="index.html"><svg class="ico ico-sm"><use href="#i-arrow-left"/></svg>Home</a><a class="btn btn-primary" href="app.html">Launch app<svg class="ico ico-sm"><use href="#i-arrow-right"/></svg></a></div>
+    </section>
+  </main>
+
+  <aside class="dtoc"><h6>On this page</h6><div id="toc"></div></aside>
+</div>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/common.js"></script>
+<script src="assets/js/docs.js"></script>
+</body>
+</html>

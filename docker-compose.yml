@@ -1,0 +1,12 @@
+services:
+  web:
+    build: .
+    container_name: makodesk
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+    # bound to localhost only: nginx on the host terminates TLS and proxies to it
+    ports:
+      - "127.0.0.1:3000:3000"

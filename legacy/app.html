@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Mako Desk — App</title>
+  <meta name="description" content="Live desk dashboard for $MAKO: order book, desk fills, PnL, Mood Engine, swap and burn log." />
+  <meta name="theme-color" content="#010608" />
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/app.css" />
+</head>
+<body class="app">
+
+<script src="assets/js/icons.js"></script>
+
+<div class="shell">
+  <aside class="side">
+    <a class="brand" href="index.html"><img src="assets/img/logo.svg" alt="" />Mako Desk</a>
+    <nav aria-label="App">
+      <a href="#overview" data-view="overview"><svg class="ico"><use href="#i-layout-dashboard"/></svg>Overview</a>
+      <a href="#desk" data-view="desk"><svg class="ico"><use href="#i-book-open"/></svg>Desk</a>
+      <a href="#swap" data-view="swap"><svg class="ico"><use href="#i-arrow-down-up"/></svg>Swap</a>
+      <a href="#mood" data-view="mood"><svg class="ico"><use href="#i-gauge"/></svg>Mood Engine</a>
+      <a href="#burns" data-view="burns"><svg class="ico"><use href="#i-flame"/></svg>Burn log</a>
+    </nav>
+    <div class="side-foot">
+      <div class="net">
+        <div class="row between" style="margin-bottom:6px"><span class="pill live" style="height:22px"><span class="dot"></span>Elysium</span><span class="muted mono" id="sideLat" style="font-size:11px">—</span></div>
+        <div class="kv2"><span>L2 block</span><b id="sideEly">—</b></div>
+        <div class="kv2"><span>HyperCore</span><b id="sideCore">—</b></div>
+        <div class="kv2"><span>Gas</span><b>HYPE</b></div>
+      </div>
+      <a class="btn btn-ghost btn-sm" href="docs.html">Documentation <svg class="ico ico-sm"><use href="#i-external-link"/></svg></a>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <a class="brand mobile-brand" href="index.html"><img src="assets/img/logo.svg" alt="" /></a>
+      <h1 id="viewTitle">Overview</h1>
+      <span class="pill warn live hide-xs" id="modePill" title="Simulated data until HyperCore precompile is live"><span class="dot"></span>Preview data</span>
+      <div class="spacer"></div>
+      <span class="pill hide-xs num" id="topPrice">$MAKO —</span>
+      <button class="btn btn-sm" id="wrongNet" style="display:none;color:var(--warn);border-color:rgba(255,194,75,.35)">Switch to Elysium</button>
+      <button class="btn btn-primary btn-sm wallet-btn" id="connectBtn"><svg class="ico ico-sm"><use href="#i-wallet"/></svg>Connect wallet</button>
+    </header>
+
+    <div class="content">
+      <div class="banner" id="previewBanner">
+        <svg class="ico" style="color:var(--warn)"><use href="#i-triangle-alert"/></svg>
+        <div><b>Preview mode.</b> The desk goes live with Elysium's Phase 2 upgrade, which adds the HyperCore precompile and ElysiumCoreWriter. Until then, desk, book and burn data below are <u>simulated</u> to show how the desk will work. Wallet, network and balances are real. <a href="docs.html#roadmap">See roadmap</a></div>
+      </div>
+
+      <!-- OVERVIEW -->
+      <section class="view" id="v-overview">
+        <div class="tiles">
+          <div class="tile"><small>$MAKO price</small><b id="tPrice">—</b><div class="d up" id="tChange">—</div></div>
+          <div class="tile"><small>Market cap</small><b id="tMcap">—</b><div class="d muted">circulating</div></div>
+          <div class="tile"><small>Total burned</small><b id="tBurn">—</b><div class="d muted" id="tBurnPct">—</div></div>
+          <div class="tile"><small>Desk treasury</small><b id="tTreas">—</b><div class="d muted">HYPE + MAKO</div></div>
+          <div class="tile"><small>Desk PnL</small><b id="tPnl" class="up">—</b><div class="d up" id="tPnlDay">—</div></div>
+          <div class="tile"><small>Holders</small><b id="tHolders">—</b><div class="d muted">on Elysium</div></div>
+        </div>
+
+        <div class="g-2">
+          <div class="panel">
+            <div class="panel-h"><h3>Desk cumulative PnL</h3><div class="r"><div class="seg" id="pnlSeg"><button>1H</button><button>24H</button><button class="on">7D</button></div></div></div>
+            <div class="panel-b"><div class="chart-wrap"><canvas id="pnlChart"></canvas></div></div>
+          </div>
+          <div class="panel">
+            <div class="panel-h"><h3>Mood</h3><div class="r"><a class="btn btn-ghost btn-sm" href="#mood">Details <svg class="ico ico-sm"><use href="#i-arrow-right"/></svg></a></div></div>
+            <div class="panel-b">
+              <div class="mood-hero" id="ovMood">
+                <div class="fin-wrap"><svg><use href="#i-fin"/></svg></div>
+                <div><h2 class="mood-name">—</h2><p class="mood-desc">—</p></div>
+              </div>
+              <div class="meter"><i class="mood-dot" style="left:50%"></i></div>
+              <div class="meter-l"><span>Feeding</span><span>Cruising</span><span>Breach</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="g-2">
+          <div class="panel">
+            <div class="panel-h"><h3>Latest desk fills</h3><div class="r"><a class="btn btn-ghost btn-sm" href="#desk">Open desk <svg class="ico ico-sm"><use href="#i-arrow-right"/></svg></a></div></div>
+            <div class="panel-b"><table class="tbl"><thead><tr><th>Time</th><th>Market</th><th>Side</th><th class="r">Size</th><th class="r hide-xs">Price</th><th class="r">Edge</th></tr></thead><tbody id="ovFills"></tbody></table></div>
+          </div>
+          <div class="panel">
+            <div class="panel-h"><h3>Recent burns</h3><div class="r"><a class="btn btn-ghost btn-sm" href="#burns">All <svg class="ico ico-sm"><use href="#i-arrow-right"/></svg></a></div></div>
+            <div class="panel-b"><table class="tbl"><tbody id="ovBurns"></tbody></table></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DESK -->
+      <section class="view" id="v-desk">
+        <div class="g-desk">
+          <div class="panel">
+            <div class="panel-h"><h3>Order book</h3><div class="r"><span class="tag">HYPE-PERP</span></div></div>
+            <div class="panel-b"><div class="ob" id="deskBook"></div><p class="muted" style="font-size:11px;margin-top:10px">Highlighted rows = desk resting quotes</p></div>
+          </div>
+          <div class="panel">
+            <div class="panel-h"><h3>Desk activity</h3><div class="r"><span class="pill mint" id="deskState"><span class="dot"></span>Quoting</span></div></div>
+            <div class="panel-b">
+              <div class="chart-wrap" style="height:220px"><canvas id="midChart"></canvas></div>
+              <table class="tbl" style="margin-top:16px"><thead><tr><th>Time</th><th>Market</th><th>Side</th><th class="r">Size</th><th class="r hide-xs">Price</th><th class="r">Edge</th></tr></thead><tbody id="deskFills"></tbody></table>
+            </div>
+          </div>
+          <div style="display:grid;gap:16px;align-content:start">
+            <div class="panel">
+              <div class="panel-h"><h3>Risk limits</h3><div class="r"><span class="tag ok">on-chain</span></div></div>
+              <div class="panel-b">
+                <div class="gauge"><div class="lbl"><span>Position used</span><b id="gPos">—</b></div><div class="bar"><i id="gPosBar"></i></div></div>
+                <div class="gauge"><div class="lbl"><span>Daily loss budget used</span><b id="gLoss">—</b></div><div class="bar"><i id="gLossBar"></i></div></div>
+                <div class="gauge" style="margin:0"><div class="lbl"><span>Inventory skew</span><b id="gSkew">—</b></div><div class="bar"><i id="gSkewBar"></i></div></div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-h"><h3>Parameters</h3><div class="r"><span class="tag">timelock 48h</span></div></div>
+              <div class="panel-b params">
+                <div><span>Max position</span><span>2,500 HYPE</span></div>
+                <div><span>Max daily loss</span><span>$4,000</span></div>
+                <div><span>Base spread</span><span id="pSpread">—</span></div>
+                <div><span>Quote refresh</span><span>~100 ms</span></div>
+                <div><span>Burn share of profit</span><span>80%</span></div>
+                <div><span>Kill-switch</span><span class="up">armed</span></div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-h"><h3>Tape</h3></div>
+              <div class="panel-b"><div class="tape" id="tape" style="max-height:220px"></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SWAP -->
+      <section class="view" id="v-swap">
+        <div class="swap-wrap">
+          <div class="panel swap">
+            <div class="row between" style="margin-bottom:14px"><h3 style="font-size:18px">Swap</h3>
+              <div class="slip" id="slip"><span class="muted" style="font-size:12px;margin-right:4px">Slippage</span><button>0.5%</button><button class="on">1%</button><button>3%</button></div>
+            </div>
+            <div class="box">
+              <div class="top"><span>You pay</span><span>Balance: <span id="balIn" class="mono">—</span><button class="max" id="maxBtn">MAX</button></span></div>
+              <div class="mid"><input id="amtIn" inputmode="decimal" placeholder="0.0" autocomplete="off" aria-label="Amount to pay" /><span class="tok-chip" id="tokIn"><span class="ic" style="background:#0f2a30;color:var(--cyan-pale)">H</span>HYPE</span></div>
+              <div class="top" style="margin-top:6px"><span id="usdIn">$0.00</span><span></span></div>
+            </div>
+            <button class="flip" id="flipBtn" aria-label="Flip direction"><svg class="ico ico-sm"><use href="#i-arrow-down"/></svg></button>
+            <div class="box">
+              <div class="top"><span>You receive</span><span>Balance: <span id="balOut" class="mono">—</span></span></div>
+              <div class="mid"><input id="amtOut" placeholder="0.0" readonly aria-label="Estimated amount received" /><span class="tok-chip" id="tokOut"><span class="ic" style="background:var(--cyan);color:var(--on-cyan)"><svg width="16" height="16"><use href="#i-fin"/></svg></span>MAKO</span></div>
+              <div class="top" style="margin-top:6px"><span id="usdOut">$0.00</span><span></span></div>
+            </div>
+            <div class="route">
+              <div><span>Rate</span><span id="rate">—</span></div>
+              <div><span>Min. received</span><span id="minOut">—</span></div>
+              <div><span>Price impact</span><span id="impact">—</span></div>
+              <div><span>Network fee</span><span>~0.00002 HYPE</span></div>
+            </div>
+            <button class="btn btn-primary btn-lg btn-block" id="swapBtn">Connect wallet</button>
+            <p class="muted" style="font-size:12px;margin-top:10px;text-align:center">Swaps route through the official $MAKO/HYPE pool. The quote shown is an estimate.</p>
+          </div>
+
+          <div class="panel">
+            <div class="panel-h"><h3>Get started on Elysium</h3></div>
+            <div class="panel-b">
+              <ol class="steps-list" id="onboard">
+                <li id="ob1"><div><b>Connect a wallet</b><small>Any EVM wallet: Rabby, MetaMask, OKX Wallet</small></div><button class="btn btn-sm" data-act="connect">Connect</button></li>
+                <li id="ob2"><div><b>Add the Elysium network</b><small>One click. Gas is paid in HYPE.</small></div><button class="btn btn-sm" data-act="network">Add network</button></li>
+                <li id="ob3"><div><b>Bridge HYPE to Elysium</b><small>Native bridge, or instant via Relay / Jumper</small></div><a class="btn btn-sm" data-href="links.bridge" href="docs.html#bridge">Bridge</a></li>
+                <li id="ob4"><div><b>Add $MAKO to your wallet</b><small>Track your balance natively</small></div><button class="btn btn-sm" data-act="watch">Add token</button></li>
+              </ol>
+              <hr class="hr" style="margin:18px 0" />
+              <div class="params">
+                <div><span>Official contract</span><span id="swCa">Published at launch</span></div>
+                <div><span>Pool</span><span>MAKO / HYPE</span></div>
+                <div><span>LP</span><span class="up">Locked</span></div>
+                <div><span>Tax</span><span>0% / 0%</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MOOD -->
+      <section class="view" id="v-mood">
+        <div class="g-2">
+          <div class="panel">
+            <div class="panel-h"><h3>Current mood</h3><div class="r"><span class="muted mono" style="font-size:12px" id="moodUpd">—</span></div></div>
+            <div class="panel-b">
+              <div class="mood-hero" id="mdMood">
+                <div class="fin-wrap"><svg><use href="#i-fin"/></svg></div>
+                <div><h2 class="mood-name">—</h2><p class="mood-desc">—</p></div>
+              </div>
+              <div class="meter"><i class="mood-dot" style="left:50%"></i></div>
+              <div class="meter-l"><span>Feeding</span><span>Hunting</span><span>Cruising</span><span>Circling</span><span>Breach</span></div>
+              <div class="tiles" style="grid-template-columns:repeat(3,1fr);margin-top:20px">
+                <div class="tile"><small>Funding (1h)</small><b id="mFund">—</b></div>
+                <div class="tile"><small>HYPE mid</small><b id="mMid">—</b></div>
+                <div class="tile"><small>Read latency</small><b id="mLat">—</b></div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-h"><h3>How mood drives the desk</h3></div>
+            <div class="panel-b">
+              <table class="tbl"><thead><tr><th>Mood</th><th>Funding</th><th class="r">Spread</th><th class="r">Burn rate</th></tr></thead>
+                <tbody id="moodTbl"></tbody></table>
+              <p class="muted" style="font-size:12px;margin-top:14px">Mood is computed on-chain from HyperCore funding and liquidation flow at each HyperCore block (~70 ms). Anyone can call <code>MakoDesk.mood()</code> to read it.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- BURNS -->
+      <section class="view" id="v-burns">
+        <div class="tiles" style="grid-template-columns:repeat(4,1fr)">
+          <div class="tile"><small>Total burned</small><b id="bTotal">—</b></div>
+          <div class="tile"><small>% of supply</small><b id="bPct">—</b></div>
+          <div class="tile"><small>Circulating</small><b id="bCirc">—</b></div>
+          <div class="tile"><small>Burns logged</small><b id="bCount">—</b></div>
+        </div>
+        <div class="panel">
+          <div class="panel-h"><h3>Burn log</h3><div class="r"><span class="tag">burn address 0x…dEaD</span></div></div>
+          <div class="panel-b"><table class="tbl"><thead><tr><th>Time</th><th>Reason</th><th class="r">Amount</th><th class="r hide-xs">Tx</th></tr></thead><tbody id="burnTbl"></tbody></table></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<nav class="tabbar" aria-label="App mobile">
+  <a href="#overview" data-view="overview"><svg class="ico"><use href="#i-layout-dashboard"/></svg>Overview</a>
+  <a href="#desk" data-view="desk"><svg class="ico"><use href="#i-book-open"/></svg>Desk</a>
+  <a href="#swap" data-view="swap"><svg class="ico"><use href="#i-arrow-down-up"/></svg>Swap</a>
+  <a href="#mood" data-view="mood"><svg class="ico"><use href="#i-gauge"/></svg>Mood</a>
+  <a href="#burns" data-view="burns"><svg class="ico"><use href="#i-flame"/></svg>Burns</a>
+</nav>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/common.js"></script>
+<script src="assets/js/sim.js"></script>
+<script src="assets/js/wallet.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
