@@ -25,7 +25,10 @@ contract Deploy is Script {
         address guardian = vm.envAddress("GUARDIAN");
         address keeper = vm.envAddress("KEEPER");
         // A Safe is recommended; an EOA admin must be opted into explicitly.
-        require(multisig.code.length > 0 || vm.envOr("ALLOW_EOA_ADMIN", false), "MULTISIG is an EOA: set ALLOW_EOA_ADMIN=true to accept");
+        require(
+            multisig.code.length > 0 || vm.envOr("ALLOW_EOA_ADMIN", false),
+            "MULTISIG is an EOA: set ALLOW_EOA_ADMIN=true to accept"
+        );
 
         address token = vm.envOr("MAKO_TOKEN_ADDRESS", address(0));
         address data = vm.envOr("DATA_ADAPTER", address(0));

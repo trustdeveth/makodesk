@@ -9,6 +9,22 @@
 
 Both contracts are source-verified on the Elysium explorer (`https://elysium.kinetiq.xyz/explorer`).
 
+### $MAKO token and buyback route (2026-11-27)
+
+| Item | Value |
+|---|---|
+| $MAKO token (launched on Montra) | `0xBF74a922615CaF3F1E8C803851557d2d5F3172E8`: "MAKO DESK"/MAKO, 18 dp, 1,000,000,000 supply, EIP-1167 clone of `0x10b0…f55f`, no owner |
+| Pool | Uniswap v4 PoolManager `0xE2e105d3F7209A9DA11f83cCf3E7398a753823F1`, PoolId `0x51b24f3deb734d786f62827c59172e582d11b89fb806005071844583e64b3659` |
+| PoolKey | currency0 native HYPE, currency1 MAKO, fee `0x800000` (dynamic), tickSpacing 200, hooks `0x6b1216A40B65c83e9c9e18a562C446697B8cf8EC` (Montra) |
+| UniswapV4BuybackRouter | `0x8a7caAec0948Cb99e8600E0aD929E348980d3961` (tx `0x1e1d8e52416064b0dc7573fbced9f5f9e0d3ddafeb64771dad647229e987679d`), source-verified. Fork-tested against the live pool: 0.01 HYPE bought 155,649 MAKO and delivered it to `0x…dEaD`, matching the on-chain quote |
+
+**Scheduled on the timelock** (tx `0x2cfa446c11341b945e1085803cc711fb6c3c76688b26bb7b09478a7ce5e7d17d`, operation `0xa9b847e78aeb5fdb1cc1a14ca742be3cb254b44570b685c495e22e871068a8ad`):
+
+- `MakoDesk.setToken(0xBF74…72E8)`
+- `MakoDesk.setAdapters(0, 0, 0x8a7c…3961, 0)`
+
+It can be executed from **2026-11-29 10:25:24 UTC** with `EXECUTOR_PK=… sh script/execute-token-buyback.sh`.
+
 ### Configuration at deploy
 
 - **Desk owner:** the TimelockController. Its minimum delay is 172,800 s (48h) and it has no admin.
@@ -21,8 +37,8 @@ Both contracts are source-verified on the Elysium explorer (`https://elysium.kin
 
 Every step goes through the timelock: `schedule`, wait 48h, then `execute`.
 
-1. After the Montra launch, call `setToken(<MAKO CA>)`. This works once only.
-2. Once Kinetiq publishes the precompile and ElysiumCoreWriter ABI, deploy the wired adapters and the Uniswap v4 buyback adapter for the Montra pool. Then call `setAdapters(data, router, buyback, coreAccount)`.
+1. ~~setToken~~ is scheduled (see above) and needs executing after the delay.
+2. Once Kinetiq publishes the precompile and ElysiumCoreWriter ABI, deploy the wired market-data and order-router adapters. Then call `setAdapters(data, router, 0x8a7c…3961, coreAccount)`, keeping the buyback router that's already deployed.
 3. After the external audit, fund the HyperCore account and the tip pool, then call `resume()`.
 
 ### Security note

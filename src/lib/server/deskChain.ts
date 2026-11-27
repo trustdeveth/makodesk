@@ -160,9 +160,22 @@ class DeskChainReader {
     }
   }
 
-  /** MAKO price in HYPE from the official LP (Uniswap-V2-style pair). */
+  /** MAKO price in HYPE: the Montra Uniswap v4 pool (native HYPE / MAKO) when configured, else a V2-style LP. */
   private async pollPool() {
     const { contracts } = getConfig();
+    const poolId = process.env.MAKO_V4_POOL_ID?.trim();
+    const manager = process.env.MAKO_V4_POOL_MANAGER?.trim();
+    if (contracts.token && poolId && manager && /^0x[0-9a-fA-F]{64}$/.test(poolId)) {
+      // StateLibrary: pools mapping at slot 6; slot0 = keccak256(poolId . 6); sqrtPriceX96 = low 160 bits
+      const slot = "0x" + hex(keccak_256(Buffer.from(poolId.slice(2) + (6).toString(16).padStart(64, "0"), "hex")));
+      const word = words(await rpc<string>("eth_call", [{ to: manager, data: "0x1e2eaeaf" + slot.slice(2) }, "latest"]))[0];
+      const sqrtP = u(word) & ((1n << 160n) - 1n);
+      if (sqrtP > 0n) {
+        const makoPerHype = (Number(sqrtP) / 2 ** 96) ** 2; // currency1 (MAKO) per currency0 (HYPE), both 18 dp
+        this.makoPriceHype = 1 / makoPerHype;
+      }
+      return;
+    }
     if (!contracts.lp || !contracts.token) return;
     if (this.makoIsToken0 === null) {
       const t0 = words(await this.call(contracts.lp, SEL.token0))[0];
